@@ -4,6 +4,7 @@
     background-color: var(--color-background-secondary);
     display: flex;
     flex-direction: column;
+    height: 100%;
 }
 
 .nav-panel .nav-item {
@@ -18,4 +19,23 @@
 
 .nav-panel .nav-item:hover {
     opacity: 1;
+}
+
+@keyframes blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.2;
+    }
+}
+
+.nav-item.sync-progress {
+    border-bottom: none;
+    color: var(--color-accent);
+    opacity: 1;
+    cursor: default;
+    margin-top: auto;
+    margin-bottom: 10px;
+    animation: blink 2s infinite;
 }

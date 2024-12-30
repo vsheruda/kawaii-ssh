@@ -18,6 +18,10 @@ export function GetSystemHealth() {
   return window['go']['main']['App']['GetSystemHealth']();
 }
 
+export function SaveProfile(arg1) {
+  return window['go']['main']['App']['SaveProfile'](arg1);
+}
+
 export function TerminateProcesses(arg1) {
   return window['go']['main']['App']['TerminateProcesses'](arg1);
 }

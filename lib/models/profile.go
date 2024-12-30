@@ -30,7 +30,7 @@ type Profile struct {
 	Tunnels           []Tunnel           `json:"tunnels"`
 }
 
-func SaveProfile(path string, profile *Profile) error {
+func saveProfile(path string, profile *Profile) error {
 	file, err := os.Create(path)
 
 	if err != nil {
@@ -60,7 +60,7 @@ func verifyProfileExists(path string) error {
 	if os.IsNotExist(err) {
 		emptyProfile := Profile{Tunnels: make([]Tunnel, 0), SSHConfigurations: make([]SSHConfiguration, 0)}
 
-		return SaveProfile(path, &emptyProfile)
+		return saveProfile(path, &emptyProfile)
 	} else if err != nil {
 		return err
 	}
@@ -80,10 +80,22 @@ func verifyProfileIntegrity(path string, profile *Profile) error {
 	}
 
 	if hasChanged {
-		return SaveProfile(path, profile)
+		return saveProfile(path, profile)
 	}
 
 	return nil
+}
+
+func SyncProfile(profile *Profile) error {
+	homeDir, err := os.UserHomeDir()
+
+	if err != nil {
+		return err
+	}
+
+	profilePath := filepath.Join(homeDir, ProfileFilename)
+
+	return saveProfile(profilePath, profile)
 }
 
 func LoadProfile() (*Profile, error) {

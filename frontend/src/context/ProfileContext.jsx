@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { GetProfile } from '../../wailsjs/go/main/App.js';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { GetProfile, SaveProfile } from '../../wailsjs/go/main/App.js';
 
 const ProfileContext = createContext({});
 
@@ -10,11 +10,27 @@ export const ProfileProvider = ({ children }) => {
         tunnels: [],
     });
     const [isLoading, setIsLoading] = useState(false);
+    const [isSyncing, setIsSyncing] = useState(false);
+    const debounceProfileSync = useRef(null);
 
     const reloadProfile = () => setForceProfileReload(forceProfileReload + 1);
 
     useEffect(() => {
-        console.log('Profile context updated', profile);
+        if (debounceProfileSync.current) {
+            clearTimeout(debounceProfileSync.current);
+        }
+
+        if (!isSyncing) {
+            setIsSyncing(true);
+        }
+
+        debounceProfileSync.current = setTimeout(() => {
+            SaveProfile(profile)
+                .catch(console.error)
+                .finally(() => setIsSyncing(false));
+        }, 3000);
+
+        return () => clearTimeout(debounceProfileSync.current);
     }, [profile]);
 
     useEffect(() => {
@@ -38,6 +54,7 @@ export const ProfileProvider = ({ children }) => {
                 isLoading,
                 setIsLoading,
                 reloadProfile,
+                isSyncing,
             }}
         >
             {children}
@@ -45,5 +62,4 @@ export const ProfileProvider = ({ children }) => {
     );
 };
 
-// Custom hook for accessing the context
 export const useProfile = () => useContext(ProfileContext);

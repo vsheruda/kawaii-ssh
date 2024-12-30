@@ -36,8 +36,8 @@ func main() {
 		},
 		Mac: &mac.Options{
 			About: &mac.AboutInfo{
-				Title:   "MyApp",
-				Message: "My message",
+				Title:   "KawaiiSSH",
+				Message: "A subjectively good take on a ssh GUI for simple tunneling.",
 				Icon:    icon,
 			},
 		},

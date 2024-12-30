@@ -155,3 +155,13 @@ func (a *App) TerminateProcesses(pids []string) {
 		delete(a.sshPipes, k)
 	}
 }
+
+func (a *App) SaveProfile(profile models.Profile) {
+	runtime.LogInfof(a.ctx, "Saving profile %v", profile)
+
+	err := models.SyncProfile(&profile)
+
+	if err != nil {
+		runtime.LogErrorf(a.ctx, "Failed to save profile error=%s", err)
+	}
+}
