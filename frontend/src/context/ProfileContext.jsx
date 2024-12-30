@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, {
+    createContext,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+} from 'react';
 import { GetProfile, SaveProfile } from '../../wailsjs/go/main/App.js';
 
 const ProfileContext = createContext({});

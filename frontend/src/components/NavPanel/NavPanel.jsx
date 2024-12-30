@@ -3,9 +3,9 @@ import './NavPanel.css';
 import { GrHomeRounded } from 'react-icons/gr';
 import { IoDesktopSharp } from 'react-icons/io5';
 import { MdElectricBolt } from 'react-icons/md';
-import { IoIosSave } from "react-icons/io";
+import { IoIosSave } from 'react-icons/io';
 import { Link } from 'react-router';
-import { useProfile } from "../../context/ProfileContext.jsx";
+import { useProfile } from '../../context/ProfileContext.jsx';
 
 function NavPanel() {
     const { isSyncing } = useProfile();
@@ -20,7 +20,7 @@ function NavPanel() {
             <Link to={'/system-health'} className={'nav-item'}>
                 <MdElectricBolt title={'System Health'} />
             </Link>
-            {isSyncing && <IoIosSave className={'nav-item sync-progress'}/>}
+            {isSyncing && <IoIosSave className={'nav-item sync-progress'} />}
         </div>
     );
 }
