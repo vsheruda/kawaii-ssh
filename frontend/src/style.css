@@ -1,0 +1,141 @@
+:root {
+    --color-background: #1b2021;
+    --color-background-80: rgba(27, 32, 33, 0.8);
+    --color-background-secondary: #51513d;
+    --color-background-secondary-80: rgba(81, 81, 61, 0.8);
+    --color-text: #e3dcc2;
+    --color-text-secondary: #e3dc95;
+    --color-accent: #a6a867;
+    --color-accent-60: rgb(166, 168, 103, 0.6);
+    --color-shadow: rgba(0, 0, 0, 0.17);
+}
+
+/*:root {*/
+/*    --color-background: #e3e3e3; !* macOS default background color for light mode *!*/
+/*    --color-background-80: rgba(248, 248, 248, 0.8); !* Used for translucent layering *!*/
+/*    --color-background-secondary: #ffffff; !* White for elevated content like cards *!*/
+/*    --color-background-secondary-80: rgba(255, 255, 255, 0.8); !* Frosted translucent white *!*/
+/*    --color-text: #1c1c1e; !* Dark gray primary text color for high contrast *!*/
+/*    --color-text-secondary: #636366; !* System gray for subtitles and secondary text *!*/
+/*    --color-accent: #007aff; !* macOS's default blue for primary accents *!*/
+/*    --color-accent-60: rgba(0, 122, 255, 0.6); !* Transparent version of the blue accent *!*/
+/*    --color-shadow: rgba(0, 0, 0, 0.17); !* Soft shadows for UI depth *!*/
+/*}*/
+
+html {
+    background-color: var(--color-background);
+    text-align: left;
+    color: var(--color-text);
+}
+
+body {
+    margin: 0;
+    color: var(--color-text);
+    font-family:
+        'Nunito',
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        'Roboto',
+        'Oxygen',
+        'Ubuntu',
+        'Cantarell',
+        'Fira Sans',
+        'Droid Sans',
+        'Helvetica Neue',
+        sans-serif;
+}
+
+select {
+    border: none;
+    border-radius: 2px;
+    outline: none;
+    height: 22px;
+    line-height: 22px;
+    padding: 0 10px;
+    background-color: var(--color-background-secondary-80);
+    color: var(--color-text);
+    width: 140px;
+}
+
+input {
+    border: none;
+    border-radius: 2px;
+    outline: none;
+    height: 22px;
+    line-height: 22px;
+    padding: 0 10px;
+    background-color: var(--color-background-secondary-80);
+    color: var(--color-text);
+}
+
+input:hover {
+    border: none;
+    background-color: var(--color-background-secondary);
+}
+
+input:focus {
+    border: none;
+    background-color: var(--color-background-secondary);
+}
+
+input:disabled {
+    opacity: 0.5;
+    background-color: var(--color-background-secondary);
+}
+
+input:disabled:hover {
+}
+
+@font-face {
+    font-family: 'Nunito';
+    font-style: normal;
+    font-weight: 400;
+    src:
+        local(''),
+        url('assets/fonts/nunito-v16-latin-regular.woff2') format('woff2');
+}
+
+#app {
+    height: 100vh;
+}
+
+button {
+    min-width: 80px;
+    height: 22px;
+    line-height: 22px;
+    border-radius: 2px;
+    border: none;
+    padding: 0 8px;
+    cursor: pointer;
+    background-color: var(--color-background-secondary);
+    color: var(--color-text);
+    font-size: 12px;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    background-image: none;
+    color: var(--color-text-secondary);
+}
+
+button:disabled:hover {
+    outline: none;
+    box-shadow: none;
+    background-image: none;
+    color: inherit;
+}
+
+button:hover {
+    background-image: linear-gradient(
+        to top,
+        var(--color-accent) 50%,
+        var(--color-text-secondary) 100%
+    );
+    color: var(--color-background-secondary);
+}
+
+h2 {
+    margin: 0 0 12px 0;
+}

@@ -1,0 +1,50 @@
+.host-settings-container {
+    padding: 12px;
+}
+
+.host-settings-container .host-settings-card {
+    display: flex;
+    width: 210px;
+    height: 82px;
+    border: 1px solid var(--color-background-secondary);
+    border-radius: 5px;
+    background-color: var(--color-background-secondary);
+    box-shadow: 0 4px 6px var(--color-shadow);
+    padding: 8px;
+    flex-direction: column;
+    cursor: pointer;
+    opacity: 0.9;
+}
+
+.host-settings-container .host-settings-card:hover {
+    border-color: var(--color-accent);
+    opacity: 1;
+}
+
+.host-settings-container .host-settings-card .name {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--color-text);
+}
+
+.host-settings-container .host-settings-card .host {
+    margin-top: 10px;
+    font-size: 14px;
+    align-items: center;
+}
+
+.host-settings-container .host-settings-card .host svg {
+    font-size: 14px;
+    margin-right: 4px;
+}
+
+.host-settings-container .host-settings-card .key {
+    margin-top: 10px;
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+.host-settings-container .host-settings-card .key svg {
+    font-size: 12px;
+    margin-right: 4px;
+}

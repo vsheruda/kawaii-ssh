@@ -1,0 +1,118 @@
+.connection-list-container .connection-list .connection-card-container {
+    padding: 12px;
+}
+
+.connection-list-container .connection-list .connection-card-container.loading {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.connection-list-container
+    .connection-list
+    .connection-card-container
+    .connection-card {
+    display: flex;
+    width: 210px;
+    height: 82px;
+    border: 1px solid var(--color-background-secondary);
+    border-radius: 5px;
+    background-color: var(--color-background-secondary);
+    box-shadow: 0 4px 6px var(--color-shadow);
+    padding: 8px;
+    flex-direction: column;
+    cursor: default;
+    opacity: 0.9;
+}
+
+.connection-list-container
+    .connection-list
+    .connection-card-container
+    .connection-card:hover {
+    border-color: var(--color-accent);
+}
+
+.connection-card .port-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.port-container .react-toggle .react-toggle-track {
+    background-color: var(--color-background);
+}
+
+.port-container
+    .react-toggle:hover:not(.react-toggle--checked)
+    .react-toggle-track {
+    background-color: var(--color-background-80) !important;
+}
+
+.port-container .react-toggle--checked:hover .react-toggle-track {
+    background-color: var(--color-accent-60) !important;
+}
+
+.port-container .react-toggle--checked .react-toggle-track {
+    background-color: var(--color-accent);
+}
+
+.port-container
+    .react-toggle--checked:hover:not(.react-toggle--disabled)
+    .react-toggle-track {
+    background-color: var(--color-accent);
+}
+
+.connection-card .port {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--color-text);
+}
+
+.connection-card .destination {
+    margin-top: 4px;
+    font-size: 12px;
+    font-style: italic;
+    color: var(--color-text);
+}
+
+.connection-card .host-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.connection-card .host-container .edit {
+    display: flex;
+    justify-self: end;
+    align-self: end;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--color-accent);
+    opacity: 0.9;
+    cursor: pointer;
+}
+
+.connection-card .host-container .edit:hover {
+    color: var(--color-text);
+    opacity: 1;
+}
+
+.connection-card .host-container .edit svg {
+    font-size: 14px;
+    margin-right: 4px;
+}
+
+.connection-card .host-container .host {
+    margin-top: 12px;
+    display: flex;
+    font-size: 12px;
+    color: var(--color-text);
+    opacity: 0.7;
+}
+
+.connection-card .host-container .host svg {
+    font-size: 14px;
+}
+
+.connection-card .host-container .host .name {
+    margin-left: 4px;
+}

@@ -1,0 +1,84 @@
+.connection-details-container {
+    width: 95%;
+    display: flex;
+    height: 100%;
+}
+
+.connection-details-container .connection-details {
+    width: 100%;
+    display: flex;
+    padding: 36px;
+    flex-direction: column;
+    justify-content: start;
+}
+
+.connection-details-container .connection-details .connection-settings {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 36px;
+}
+
+.connection-details-container .connection-details .terminal-stdout {
+    display: flex;
+    width: 100%;
+    height: 60%;
+}
+
+.connection-settings div.input-row {
+    margin-bottom: 22px;
+    display: flex;
+}
+
+.connection-settings div.input-row label {
+    margin-right: 5px;
+    font-size: 12px;
+    line-height: 22px;
+    width: 80px;
+}
+
+.connection-settings div.input-row input {
+    display: flex;
+    margin-bottom: 6px;
+    width: 70%;
+}
+
+.connection-settings div.input-row input#local-port {
+    width: 70px;
+    margin-right: 10px;
+}
+
+.connection-settings div.input-row input#remote-destination {
+    width: 50%;
+    margin-right: 10px;
+}
+
+.connection-settings div.input-row input#remote-port {
+    width: 70px;
+}
+
+.connection-settings .control-panel {
+    display: flex;
+    flex-direction: row;
+}
+
+.connection-settings .control-panel button {
+    margin-right: 12px;
+}
+
+.status-circle {
+    margin: 8px 0 8px 0;
+    display: block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--color-background-secondary);
+}
+
+.status-circle.connected {
+    background-color: #b7ff00;
+}
+
+.status-circle.error {
+    background-color: #a10023;
+}

@@ -1,0 +1,13 @@
+.host-settings-list-container {
+    width: 95%;
+    height: 100%;
+    overflow: scroll;
+}
+
+.host-settings-list-container .host-settings-list {
+    padding: 24px;
+    display: flex;
+    flex: 1;
+    flex-flow: row wrap;
+    justify-content: flex-start;
+}

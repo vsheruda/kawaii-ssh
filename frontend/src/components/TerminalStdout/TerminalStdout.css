@@ -1,0 +1,37 @@
+.terminal-stdout {
+    height: 100%;
+    width: 100%;
+}
+
+.terminal {
+    padding: 0 0 12px 4px;
+    height: 100%;
+    width: 100%;
+    border-radius: 2px;
+    background-color: var(--color-background-secondary);
+    overflow: scroll;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    justify-items: center;
+}
+
+.terminal .terminal-line {
+    margin: 2px;
+    line-height: 1.4;
+}
+
+.terminal .terminal-single-message {
+    display: flex;
+    justify-content: center;
+    align-self: center;
+    font-size: 16px;
+    width: 30%;
+    background-color: var(--color-background-secondary);
+    border: 1px solid var(--color-text);
+    color: var(--color-text);
+    opacity: 0.7;
+}

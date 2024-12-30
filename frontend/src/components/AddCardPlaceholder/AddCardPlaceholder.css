@@ -1,0 +1,30 @@
+.add-card-container {
+    padding: 12px;
+}
+
+.add-card-container .add-card {
+    border: 2px dashed var(--color-background-secondary);
+    background-color: var(--color-background);
+    justify-content: center;
+    color: var(--color-background-secondary);
+    display: flex;
+    width: 210px;
+    height: 82px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px var(--color-shadow);
+    padding: 8px;
+    flex-direction: column;
+    cursor: pointer;
+    opacity: 0.9;
+}
+
+.add-card .add-card-button {
+    align-self: center;
+    font-size: 34px;
+    display: flex;
+}
+
+.add-card-container .add-card:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}

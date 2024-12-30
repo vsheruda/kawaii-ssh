@@ -1,0 +1,13 @@
+.connection-list-container {
+    width: 95%;
+    height: 100%;
+    overflow: scroll;
+}
+
+.connection-list-container .connection-list {
+    padding: 24px;
+    display: flex;
+    flex: 1;
+    flex-flow: row wrap;
+    justify-content: flex-start;
+}
