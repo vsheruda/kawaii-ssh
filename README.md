@@ -1,11 +1,11 @@
-# README
+# Kawaii SSH
 
-## About
+A subjectively nice GUI for ssh cmd. Created to easily manage multiple SSH tunnels and stop bothering with dozens of terminal windows.
 
-This is the official Wails React template.
+## Demo
 
-You can configure the project by editing `wails.json`. More information about the project settings can be found
-here: https://wails.io/docs/reference/project-config
+![Demo 0.3.0](etc/demo-0.3.0.gif)
+
 
 ## Live Development
 
@@ -17,6 +17,18 @@ to this in your browser, and you can call your Go code from devtools.
 ## Building
 
 To build a redistributable, production mode package, use `wails build`.
+
+```shell
+wails build -platform darwin/universal
+```
+
+```shell
+wails build -platform linux/amd64
+```
+
+```shell
+wails build -platform windows/amd64
+```
 
 ### To change icon
 - Change the default appicon.png
