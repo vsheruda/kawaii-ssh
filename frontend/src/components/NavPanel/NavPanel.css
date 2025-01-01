@@ -21,6 +21,10 @@
     opacity: 1;
 }
 
+.nav-panel .nav-item.selected {
+    opacity: 1;
+}
+
 @keyframes blink {
     0%,
     100% {
