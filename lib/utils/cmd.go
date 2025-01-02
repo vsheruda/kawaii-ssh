@@ -144,7 +144,7 @@ func Ssh(
 	}
 
 	cmdStr := fmt.Sprintf(
-		"%s %s@%s -L %s:%s:%s -i %s -v -o IdentitiesOnly=yes sleep %d",
+		"%s %s@%s -L %s:%s:%s -i %s -v -o IdentitiesOnly=yes -o StrictHostKeyChecking=no sleep %d",
 		SSHExecutable,
 		username,
 		host,
