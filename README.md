@@ -43,3 +43,14 @@ wails build -platform darwin/amd64
 ```shell
 $ dlv debug --headless --listen=:2345 --api-version=2 --accept-multiclient --build-flags='-tags=dev'
 ```
+
+## Issues
+
+- [ ] No way to know if you are actually connected to the server successfully;
+    - To reproduce: set invalid username for host and try to connect.
+- [ ] Once disconnected, automatic polling doesn't refresh connection list page for a reason (the detail page works fine);
+- [ ] Log file is not saved;
+- [ ] Nullpointer on disconnect when there is no pipe
+- [ ] Add visual grouping by server;
+- [ ] Add autocomplete for key paths;
+- [ ] Fix length of the host name limit;

@@ -12,7 +12,7 @@ import (
 // App struct
 type App struct {
 	ctx      context.Context
-	sshPipes map[string]*utils.SSHPipe
+	sshPipes map[string]*utils.SSHPipeResult
 }
 
 // NewApp creates a new App application struct
@@ -24,7 +24,7 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	a.sshPipes = make(map[string]*utils.SSHPipe)
+	a.sshPipes = make(map[string]*utils.SSHPipeResult)
 }
 
 func (a *App) Disconnect(hash string) models.ConnectResponse {
@@ -32,17 +32,22 @@ func (a *App) Disconnect(hash string) models.ConnectResponse {
 
 	sshPipe := a.sshPipes[hash]
 
-	sshPipe.Stop()
+	sshPipe.PipeResult.Stop()
 
 	delete(a.sshPipes, hash)
 
-	runtime.LogInfof(a.ctx, "Disconnected hash=%s response_code=%d", sshPipe.Hash(), sshPipe.ResponseCode())
+	runtime.LogInfof(
+		a.ctx,
+		"Disconnected hash=%s response_code=%d",
+		sshPipe.PipeResult.Hash(),
+		sshPipe.PipeResult.ResponseCode(),
+	)
 
 	return models.ConnectResponse{
-		ID:              sshPipe.Hash(),
-		Messages:        sshPipe.Messages,
-		ResponseMessage: sshPipe.ResponseMessage(),
-		ResponseCode:    sshPipe.ResponseCode(),
+		ID:              sshPipe.PipeResult.Hash(),
+		Messages:        sshPipe.PipeResult.Messages,
+		ResponseMessage: sshPipe.PipeResult.ResponseMessage(),
+		ResponseCode:    sshPipe.PipeResult.ResponseCode(),
 	}
 }
 
@@ -55,31 +60,30 @@ func (a *App) Connect(payload models.ConnectPayload) models.ConnectResponse {
 		payload.RemoteDestination,
 		payload.RemotePort,
 		payload.KeyPath,
-		nil,
 	)
 
-	if _, ok := a.sshPipes[sshPipe.Hash()]; !ok {
-		a.sshPipes[sshPipe.Hash()] = sshPipe
+	if _, ok := a.sshPipes[sshPipe.PipeResult.Hash()]; !ok {
+		a.sshPipes[sshPipe.PipeResult.Hash()] = sshPipe
 
-		sshPipe.Run()
+		sshPipe.PipeResult.Run()
 
 		time.Sleep(3 * time.Second)
 	} else {
-		sshPipe = a.sshPipes[sshPipe.Hash()]
+		sshPipe = a.sshPipes[sshPipe.PipeResult.Hash()]
 	}
 
 	runtime.LogInfof(
 		a.ctx,
 		"Returning connection response info=%s response_message=%s",
-		sshPipe.Messages,
-		sshPipe.ResponseMessage(),
+		sshPipe.PipeResult.Messages,
+		sshPipe.PipeResult.ResponseMessage(),
 	)
 
 	return models.ConnectResponse{
-		ID:              sshPipe.Hash(),
-		Messages:        sshPipe.Messages,
-		ResponseMessage: sshPipe.ResponseMessage(),
-		ResponseCode:    sshPipe.ResponseCode(),
+		ID:              sshPipe.PipeResult.Hash(),
+		Messages:        sshPipe.PipeResult.Messages,
+		ResponseMessage: sshPipe.PipeResult.ResponseMessage(),
+		ResponseCode:    sshPipe.PipeResult.ResponseCode(),
 	}
 }
 
@@ -164,4 +168,26 @@ func (a *App) SaveProfile(profile models.Profile) {
 	if err != nil {
 		runtime.LogErrorf(a.ctx, "Failed to save profile error=%s", err)
 	}
+}
+
+func (a *App) GetConnections() []models.ConnectionStateResponse {
+	connections := make([]models.ConnectionStateResponse, 0)
+
+	for k, sshPipe := range a.sshPipes {
+		isConnected := utils.IsConnectionOpen(a.ctx, sshPipe.LocalPort)
+
+		connections = append(connections, models.ConnectionStateResponse{
+			ID:          k,
+			Messages:    sshPipe.PipeResult.Messages,
+			IsConnected: isConnected,
+		})
+	}
+
+	for _, it := range connections {
+		if !it.IsConnected {
+			delete(a.sshPipes, it.ID)
+		}
+	}
+
+	return connections
 }

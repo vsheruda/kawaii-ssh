@@ -27,10 +27,7 @@ function connect(tunnel) {
             return {
                 hash: response.id,
                 status: ConnectionStatus.CONNECTED,
-                stdout: [
-                    ...response.messages,
-                    `Connected to ${tunnel.ssh_configuration.username}@${tunnel.ssh_configuration.host} using ${tunnel.ssh_configuration.key_path}`,
-                ],
+                stdout: response.messages,
             };
         })
         .catch((response) => {
@@ -52,7 +49,7 @@ function disconnect(tunnel) {
             return {
                 hash: null,
                 status: ConnectionStatus.DISCONNECTED,
-                stdout: [...response.messages, '...', 'Disconnected'],
+                stdout: response.messages,
             };
         })
         .catch((response) => {

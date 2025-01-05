@@ -35,3 +35,9 @@ type SystemHealthResponse struct {
 	ResponseCode int16        `json:"responseCode" required:"true"`
 	OpenTunnels  []OpenTunnel `json:"openTunnels"`
 }
+
+type ConnectionStateResponse struct {
+	ID          string   `json:"id"`
+	Messages    []string `json:"messages"`
+	IsConnected bool     `json:"is_connected"`
+}

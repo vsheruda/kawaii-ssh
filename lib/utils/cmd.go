@@ -14,7 +14,7 @@ var ConnectionTimeout = 60 * 30
 
 const SSHExecutable = "ssh"
 
-type SSHPipe struct {
+type PipeResult struct {
 	cmd             *exec.Cmd
 	Messages        []string
 	PipeError       error
@@ -23,16 +23,21 @@ type SSHPipe struct {
 	messageChannel chan string
 }
 
-func (p *SSHPipe) AppendMessage(line string) {
+type SSHPipeResult struct {
+	PipeResult *PipeResult
+	LocalPort  string
+}
+
+func (p *PipeResult) AppendMessage(line string) {
 	p.messageChannel <- line
 }
 
-func (p *SSHPipe) Fail(err error, reason string) {
+func (p *PipeResult) Fail(err error, reason string) {
 	p.PipeError = err
 	p.PipeErrorReason = reason
 }
 
-func (p *SSHPipe) ResponseCode() int16 {
+func (p *PipeResult) ResponseCode() int16 {
 	if p.PipeError != nil || len(p.PipeErrorReason) > 0 {
 		return 500
 	}
@@ -40,7 +45,7 @@ func (p *SSHPipe) ResponseCode() int16 {
 	return 200
 }
 
-func (p *SSHPipe) ResponseMessage() string {
+func (p *PipeResult) ResponseMessage() string {
 	if len(p.PipeErrorReason) > 0 {
 		return p.PipeErrorReason
 	}
@@ -48,7 +53,7 @@ func (p *SSHPipe) ResponseMessage() string {
 	return "success"
 }
 
-func (p *SSHPipe) Run() {
+func (p *PipeResult) Run() {
 	if err := p.cmd.Start(); err != nil {
 		p.Fail(err, "failed to start command")
 	}
@@ -69,7 +74,7 @@ func (p *SSHPipe) Run() {
 	}()
 }
 
-func (p *SSHPipe) Stop() {
+func (p *PipeResult) Stop() {
 	if p.cmd.Process != nil {
 		err := p.cmd.Process.Kill()
 
@@ -79,12 +84,12 @@ func (p *SSHPipe) Stop() {
 	}
 }
 
-func (p *SSHPipe) Hash() string {
+func (p *PipeResult) Hash() string {
 	return GetMD5Hash(strings.Join(p.cmd.Args, " "))
 }
 
-func Pipe(cmd exec.Cmd) *SSHPipe {
-	pipeResult := SSHPipe{
+func Pipe(cmd exec.Cmd) *PipeResult {
+	pipeResult := PipeResult{
 		cmd:            &cmd,
 		Messages:       make([]string, 0),
 		messageChannel: make(chan string),
@@ -137,12 +142,7 @@ func Ssh(
 	remoteDestination string,
 	remotePort string,
 	keyPath string,
-	timeout *int,
-) *SSHPipe {
-	if timeout == nil {
-		timeout = &ConnectionTimeout
-	}
-
+) *SSHPipeResult {
 	cmdStr := fmt.Sprintf(
 		"%s %s@%s -L %s:%s:%s -i %s -v -o IdentitiesOnly=yes -o StrictHostKeyChecking=no sleep %d",
 		SSHExecutable,
@@ -161,7 +161,7 @@ func Ssh(
 
 	pipeResult := Pipe(*cmd)
 
-	return pipeResult
+	return &SSHPipeResult{PipeResult: pipeResult, LocalPort: localPort}
 }
 
 func CmdExecute(ctx context.Context, cmdStr string) ([]string, error) {
@@ -180,4 +180,10 @@ func CmdExecute(ctx context.Context, cmdStr string) ([]string, error) {
 	lines := strings.Split(out.String(), "\n")
 
 	return lines, nil
+}
+
+func IsConnectionOpen(ctx context.Context, localPort string) bool {
+	response, _ := CmdExecute(ctx, fmt.Sprintf("netstat -an | grep %s", localPort))
+
+	return len(response) > 0
 }

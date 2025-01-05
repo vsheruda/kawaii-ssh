@@ -6,6 +6,8 @@ export function Connect(arg1:models.ConnectPayload):Promise<models.ConnectRespon
 
 export function Disconnect(arg1:string):Promise<models.ConnectResponse>;
 
+export function GetConnections():Promise<Array<models.ConnectionStateResponse>>;
+
 export function GetProfile():Promise<models.ProfileResponse>;
 
 export function GetSystemHealth():Promise<models.SystemHealthResponse>;

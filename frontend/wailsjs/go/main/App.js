@@ -10,6 +10,10 @@ export function Disconnect(arg1) {
   return window['go']['main']['App']['Disconnect'](arg1);
 }
 
+export function GetConnections() {
+  return window['go']['main']['App']['GetConnections']();
+}
+
 export function GetProfile() {
   return window['go']['main']['App']['GetProfile']();
 }
