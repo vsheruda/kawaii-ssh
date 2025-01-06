@@ -14,7 +14,7 @@ function ConnectionCard({ tunnel, onChange }) {
     );
     const [isLoading, setIsLoading] = useState(false);
 
-    const toDestination = (value, limit = 33) => {
+    const toDestination = (value, limit = 32) => {
         if (value.length <= limit) {
             return value;
         }
