@@ -28,33 +28,29 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 	a.sshPipes = make(map[string]*utils.SSHPipeResult)
 
-	go func() {
-		for {
-			disconnectedPipes := make([]string, 0)
+	go ConnectionLoop(a)
+}
 
-			a.sshPipesMutex.Lock()
+func ConnectionLoop(a *App) {
+	for {
+		a.sshPipesMutex.Lock()
 
-			for k, sshPipe := range a.sshPipes {
-				if !sshPipe.IsConnected {
-					continue
-				}
-
-				sshPipe.IsConnected = utils.IsConnectionOpen(a.ctx, sshPipe.LocalPort)
-
-				if !sshPipe.IsConnected {
-					disconnectedPipes = append(disconnectedPipes, k)
-				}
+		for k, sshPipe := range a.sshPipes {
+			if !sshPipe.IsConnected {
+				continue
 			}
 
-			//for _, it := range disconnectedPipes {
-			//	delete(a.sshPipes, it)
-			//}
+			sshPipe.IsConnected = utils.IsConnectionOpen(a.ctx, sshPipe.LocalPort)
 
-			a.sshPipesMutex.Unlock()
-
-			time.Sleep(2 * time.Second)
+			if !sshPipe.IsConnected {
+				utils.SshReconnect(a.ctx, a.sshPipes[k])
+			}
 		}
-	}()
+
+		a.sshPipesMutex.Unlock()
+
+		time.Sleep(2 * time.Second)
+	}
 }
 
 func (a *App) Disconnect(hash string) models.ConnectResponse {

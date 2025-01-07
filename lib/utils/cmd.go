@@ -11,6 +11,7 @@ import (
 )
 
 var ConnectionTimeout = 60 * 30
+var PipeMessageHistorySize = 500
 
 const SSHExecutable = "ssh"
 
@@ -163,6 +164,31 @@ func Ssh(
 	pipeResult := Pipe(*cmd)
 
 	return &SSHPipeResult{PipeResult: pipeResult, LocalPort: localPort, IsConnected: true}
+}
+
+func SshReconnect(ctx context.Context, sshPipe *SSHPipeResult) *SSHPipeResult {
+	runtime.LogInfof(ctx, "Reconnecting SSH command")
+
+	cmd := exec.Command(sshPipe.PipeResult.cmd.Path, sshPipe.PipeResult.cmd.Args[1:]...)
+
+	reconnectedPipe := Pipe(*cmd)
+
+	// Copy messages from the previous pipe
+	for _, msg := range sshPipe.PipeResult.Messages {
+		reconnectedPipe.Messages = append(reconnectedPipe.Messages, msg)
+	}
+
+	// Cut message history to avoid memory leaks
+	if len(reconnectedPipe.Messages) > PipeMessageHistorySize {
+		reconnectedPipe.Messages = reconnectedPipe.Messages[:PipeMessageHistorySize]
+	}
+
+	reconnectedPipe.Run()
+
+	sshPipe.PipeResult = reconnectedPipe
+	sshPipe.IsConnected = true
+
+	return sshPipe
 }
 
 func CmdExecute(ctx context.Context, cmdStr string) ([]string, error) {
