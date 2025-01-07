@@ -3,6 +3,7 @@ package main
 import (
 	"KawaiiSSH/lib/utils"
 	"embed"
+	"fmt"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -14,6 +15,8 @@ var assets embed.FS
 
 //go:embed build/appicon.png
 var icon []byte
+
+var Version = "0.5.0"
 
 func main() {
 	// Create an instance of the app structure
@@ -36,9 +39,12 @@ func main() {
 		},
 		Mac: &mac.Options{
 			About: &mac.AboutInfo{
-				Title:   "KawaiiSSH",
-				Message: "A subjectively good take on a ssh GUI for simple tunneling.",
-				Icon:    icon,
+				Title: "KawaiiSSH",
+				Message: fmt.Sprintf(
+					"A subjectively good take on a ssh GUI for simple tunneling.\n Version: %s",
+					Version,
+				),
+				Icon: icon,
 			},
 		},
 		Logger: log,
