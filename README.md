@@ -50,4 +50,3 @@ $ dlv debug --headless --listen=:2345 --api-version=2 --accept-multiclient --bui
 - [ ] Log file is not saved;
 - [ ] Add visual grouping by server;
 - [ ] Add autocomplete for key paths;
-- [ ] Fix length of the host name limit;

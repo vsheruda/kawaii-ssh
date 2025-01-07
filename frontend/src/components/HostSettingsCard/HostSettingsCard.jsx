@@ -4,7 +4,7 @@ import { CiGlobe } from 'react-icons/ci';
 import { LuKeySquare } from 'react-icons/lu';
 import { useNavigate } from 'react-router';
 
-const toName = (it) => it.slice(0, 15);
+const toName = (it) => it.slice(0, 20);
 
 const toHostName = (it) => {
     if (it.length <= 20) {
