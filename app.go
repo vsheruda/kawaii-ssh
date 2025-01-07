@@ -6,13 +6,15 @@ import (
 	"context"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"regexp"
+	"sync"
 	"time"
 )
 
 // App struct
 type App struct {
-	ctx      context.Context
-	sshPipes map[string]*utils.SSHPipeResult
+	ctx           context.Context
+	sshPipes      map[string]*utils.SSHPipeResult
+	sshPipesMutex sync.Mutex
 }
 
 // NewApp creates a new App application struct
@@ -25,10 +27,50 @@ func NewApp() *App {
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 	a.sshPipes = make(map[string]*utils.SSHPipeResult)
+
+	go func() {
+		for {
+			disconnectedPipes := make([]string, 0)
+
+			a.sshPipesMutex.Lock()
+
+			for k, sshPipe := range a.sshPipes {
+				if !sshPipe.IsConnected {
+					continue
+				}
+
+				sshPipe.IsConnected = utils.IsConnectionOpen(a.ctx, sshPipe.LocalPort)
+
+				if !sshPipe.IsConnected {
+					disconnectedPipes = append(disconnectedPipes, k)
+				}
+			}
+
+			//for _, it := range disconnectedPipes {
+			//	delete(a.sshPipes, it)
+			//}
+
+			a.sshPipesMutex.Unlock()
+
+			time.Sleep(2 * time.Second)
+		}
+	}()
 }
 
 func (a *App) Disconnect(hash string) models.ConnectResponse {
 	runtime.LogInfof(a.ctx, "Disconnecting hash=%s", hash)
+
+	a.sshPipesMutex.Lock()
+	defer a.sshPipesMutex.Unlock()
+
+	if _, ok := a.sshPipes[hash]; !ok || !a.sshPipes[hash].IsConnected {
+		return models.ConnectResponse{
+			ID:              hash,
+			Messages:        []string{},
+			ResponseMessage: "Already disconnected",
+			ResponseCode:    200,
+		}
+	}
 
 	sshPipe := a.sshPipes[hash]
 
@@ -62,14 +104,19 @@ func (a *App) Connect(payload models.ConnectPayload) models.ConnectResponse {
 		payload.KeyPath,
 	)
 
-	if _, ok := a.sshPipes[sshPipe.PipeResult.Hash()]; !ok {
-		a.sshPipes[sshPipe.PipeResult.Hash()] = sshPipe
+	a.sshPipesMutex.Lock()
+	defer a.sshPipesMutex.Unlock()
+
+	hash := sshPipe.PipeResult.Hash()
+
+	if _, ok := a.sshPipes[hash]; !ok || !a.sshPipes[hash].IsConnected {
+		a.sshPipes[hash] = sshPipe
 
 		sshPipe.PipeResult.Run()
 
-		time.Sleep(3 * time.Second)
+		time.Sleep(2 * time.Second)
 	} else {
-		sshPipe = a.sshPipes[sshPipe.PipeResult.Hash()]
+		sshPipe = a.sshPipes[hash]
 	}
 
 	runtime.LogInfof(
@@ -80,7 +127,7 @@ func (a *App) Connect(payload models.ConnectPayload) models.ConnectResponse {
 	)
 
 	return models.ConnectResponse{
-		ID:              sshPipe.PipeResult.Hash(),
+		ID:              hash,
 		Messages:        sshPipe.PipeResult.Messages,
 		ResponseMessage: sshPipe.PipeResult.ResponseMessage(),
 		ResponseCode:    sshPipe.PipeResult.ResponseCode(),
@@ -113,7 +160,7 @@ func (a *App) GetSystemHealth() models.SystemHealthResponse {
 		return models.SystemHealthResponse{ResponseCode: 500}
 	}
 
-	pattern := `[^\s]+ (\d+) .+ ssh ([a-zA-Z0-9._-]+)@(.+) -L (\d+):([^:]+):(\d+) -i (.+) -v -o IdentitiesOnly=yes`
+	pattern := `[^\s]+\s+(\d+) .+ ssh ([a-zA-Z0-9._-]+)@(.+) -L (\d+):([^:]+):(\d+) -i (.+) -v -o IdentitiesOnly=yes`
 	re := regexp.MustCompile(pattern)
 
 	openTunnels := make([]models.OpenTunnel, 0)
@@ -173,20 +220,15 @@ func (a *App) SaveProfile(profile models.Profile) {
 func (a *App) GetConnections() []models.ConnectionStateResponse {
 	connections := make([]models.ConnectionStateResponse, 0)
 
-	for k, sshPipe := range a.sshPipes {
-		isConnected := utils.IsConnectionOpen(a.ctx, sshPipe.LocalPort)
+	a.sshPipesMutex.Lock()
+	defer a.sshPipesMutex.Unlock()
 
+	for k, sshPipe := range a.sshPipes {
 		connections = append(connections, models.ConnectionStateResponse{
 			ID:          k,
 			Messages:    sshPipe.PipeResult.Messages,
-			IsConnected: isConnected,
+			IsConnected: sshPipe.IsConnected,
 		})
-	}
-
-	for _, it := range connections {
-		if !it.IsConnected {
-			delete(a.sshPipes, it.ID)
-		}
 	}
 
 	return connections

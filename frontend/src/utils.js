@@ -14,6 +14,16 @@ const isSameSSHConfig = (c1) => (c2) => {
 };
 
 const handleConnectionsStateChange = (profile, setProfile) => (connections) => {
+    // Reset connection status
+    for (let i = 0; i < profile.tunnels.length; i += 1) {
+        if (!profile.tunnels[i].connection) {
+            continue;
+        }
+
+        profile.tunnels[i].connection.status = ConnectionStatus.DISCONNECTED;
+    }
+
+    // Set newly fetched connection status
     for (const connection of connections) {
         const tunnel = profile.tunnels.find(
             (it) => it.connection?.hash === connection.id
@@ -22,6 +32,8 @@ const handleConnectionsStateChange = (profile, setProfile) => (connections) => {
         if (!tunnel) {
             continue;
         }
+
+        console.log("Updating connection: ", tunnel, " with:", connection);
 
         tunnel.connection.status = connection.is_connected ? ConnectionStatus.CONNECTED : ConnectionStatus.DISCONNECTED;
         tunnel.connection.stdout = connection.messages;
@@ -102,6 +114,10 @@ const getFlatTunnels = (profile) => {
     }));
 };
 
+const hasOpenConnections = (tunnels) => {
+    return tunnels.some((tunnel) => tunnel.connection?.status === ConnectionStatus.CONNECTED);
+};
+
 export {
     handleTunnelStateChange,
     handleSSHConfigurationStateChange,
@@ -109,4 +125,5 @@ export {
     getFlatTunnels,
     isSameTunnel,
     isSameSSHConfig,
+    hasOpenConnections
 };

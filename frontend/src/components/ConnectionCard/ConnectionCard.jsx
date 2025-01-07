@@ -9,10 +9,9 @@ import { connect, disconnect } from '../../operations.js';
 
 function ConnectionCard({ tunnel, onChange }) {
     const navigate = useNavigate();
-    const [isEnabled, setIsEnabled] = useState(
-        tunnel.connection?.status === ConnectionStatus.CONNECTED
-    );
     const [isLoading, setIsLoading] = useState(false);
+
+    const isEnabled = tunnel.connection?.status === ConnectionStatus.CONNECTED;
 
     const toDestination = (value, limit = 32) => {
         if (value.length <= limit) {
@@ -30,14 +29,11 @@ function ConnectionCard({ tunnel, onChange }) {
         setIsLoading(true);
         const newEnabledState = e.target.checked;
 
-        setIsEnabled(newEnabledState);
-
         if (newEnabledState) {
             connect(tunnel)
                 .then((connectionState) =>
                     onChange(tunnel, { connectionState })
                 )
-                .catch(() => setIsEnabled(false))
                 .finally(() => setIsLoading(false));
         } else {
             disconnect(tunnel)
@@ -54,7 +50,7 @@ function ConnectionCard({ tunnel, onChange }) {
                 <div className={'port-container'}>
                     <span className={'port'}>{tunnel.local_port}</span>
                     <Toggle
-                        checked={isEnabled}
+                        checked={isEnabled || isLoading}
                         disabled={isLoading}
                         icons={false}
                         onChange={onToggleChange}

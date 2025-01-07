@@ -10,11 +10,11 @@ import {
     SaveProfile,
     GetConnections,
 } from '../../wailsjs/go/main/App.js';
-import { handleConnectionsStateChange } from '../utils.js';
+import { handleConnectionsStateChange, hasOpenConnections } from '../utils.js';
 
 const ProfileContext = createContext({});
 
-const CONNECTION_STATE_REFRESH_INTERVAL = 10000;
+const CONNECTION_STATE_REFRESH_INTERVAL = 5000;
 
 export const ProfileProvider = ({ children }) => {
     const [forceProfileReload, setForceProfileReload] = useState(0);
@@ -32,6 +32,10 @@ export const ProfileProvider = ({ children }) => {
     const reloadProfile = () => setForceProfileReload(forceProfileReload + 1);
     const updateConnectionsStates = () =>
         setForceConnectionStateUpdate(forceConnectionStateUpdate + 1);
+    const scheduleUpdateConnectionsStates = () => setTimeout(
+        () => updateConnectionsStates(),
+        CONNECTION_STATE_REFRESH_INTERVAL
+    );
 
     const onConnectionsStateChange = handleConnectionsStateChange(
         profile,
@@ -70,13 +74,20 @@ export const ProfileProvider = ({ children }) => {
     }, [forceProfileReload]);
 
     useEffect(() => {
+        console.log('Updating connection states');
+
+        if (!hasOpenConnections(profile.tunnels)) {
+            console.log('No open connections, skipping');
+            scheduleUpdateConnectionsStates();
+            return;
+        }
+
+        console.log('Fetching connection states');
         GetConnections().then((response) => {
+            console.log('Fetched connection states', response);
             onConnectionsStateChange(response);
 
-            setTimeout(
-                () => updateConnectionsStates(),
-                CONNECTION_STATE_REFRESH_INTERVAL
-            );
+            scheduleUpdateConnectionsStates();
         });
     }, [forceConnectionStateUpdate]);
 
@@ -85,10 +96,7 @@ export const ProfileProvider = ({ children }) => {
             return;
         }
 
-        connectionStateTimeout.current = setTimeout(
-            () => updateConnectionsStates(),
-            CONNECTION_STATE_REFRESH_INTERVAL
-        );
+        connectionStateTimeout.current = scheduleUpdateConnectionsStates();
     }, []);
 
     return (

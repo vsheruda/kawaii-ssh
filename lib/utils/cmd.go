@@ -24,8 +24,9 @@ type PipeResult struct {
 }
 
 type SSHPipeResult struct {
-	PipeResult *PipeResult
-	LocalPort  string
+	PipeResult  *PipeResult
+	LocalPort   string
+	IsConnected bool
 }
 
 func (p *PipeResult) AppendMessage(line string) {
@@ -161,7 +162,7 @@ func Ssh(
 
 	pipeResult := Pipe(*cmd)
 
-	return &SSHPipeResult{PipeResult: pipeResult, LocalPort: localPort}
+	return &SSHPipeResult{PipeResult: pipeResult, LocalPort: localPort, IsConnected: true}
 }
 
 func CmdExecute(ctx context.Context, cmdStr string) ([]string, error) {
