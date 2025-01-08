@@ -32,10 +32,11 @@ export const ProfileProvider = ({ children }) => {
     const reloadProfile = () => setForceProfileReload(forceProfileReload + 1);
     const updateConnectionsStates = () =>
         setForceConnectionStateUpdate(forceConnectionStateUpdate + 1);
-    const scheduleUpdateConnectionsStates = () => setTimeout(
-        () => updateConnectionsStates(),
-        CONNECTION_STATE_REFRESH_INTERVAL
-    );
+    const scheduleUpdateConnectionsStates = () =>
+        setTimeout(
+            () => updateConnectionsStates(),
+            CONNECTION_STATE_REFRESH_INTERVAL
+        );
 
     const onConnectionsStateChange = handleConnectionsStateChange(
         profile,

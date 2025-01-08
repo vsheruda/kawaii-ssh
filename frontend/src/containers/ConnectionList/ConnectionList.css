@@ -8,6 +8,43 @@
     padding: 24px;
     display: flex;
     flex: 1;
-    flex-flow: row wrap;
+    flex-flow: column wrap;
     justify-content: flex-start;
+}
+
+.connection-list-container .connection-list .connection-list-items {
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.connection-list-container .connection-list .connection-list-items {
+    display: flex;
+}
+
+.connection-list-container .connection-list.grouped .connection-list-items {
+    display: flex;
+    flex-flow: column wrap;
+    margin-bottom: 10px;
+}
+
+.connection-list-container .connection-list.grouped.compact .connection-list-items {
+    flex-flow: row wrap;
+}
+
+.connection-list-container .connection-list .connection-group {
+    display: flex;
+    flex-flow: column wrap;
+    margin-bottom: 10px;
+}
+
+.connection-list-container .connection-list .connection-group .title {
+    margin: 0 12px;
+    font-weight: 800;
+    color: var(--color-background-secondary);
+    border-bottom: 1px solid var(--color-background-secondary-80);
+}
+
+.connection-list-container .connection-list .connection-group .group-cards {
+    display: flex;
+    flex-flow: row wrap;
 }

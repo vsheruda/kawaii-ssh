@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './ConnectionList.css';
 
 import { useProfile } from '../../context/ProfileContext.jsx';
@@ -7,10 +7,67 @@ import { getFlatTunnels, handleTunnelStateChange } from '../../utils.js';
 import AddCardPlaceholder from '../../components/AddCardPlaceholder/AddCardPlaceholder.jsx';
 import { useNavigate } from 'react-router';
 import { v4 as uuid } from 'uuid';
+import _ from 'lodash';
+import { ConnectionStatus } from '../../const.js';
+
+function ConnectionGroup({ title, tunnels, setProfile, profile }) {
+    return (
+        <div className={'connection-group'}>
+            <span className={'title'}>{title}</span>
+            <div className={'group-cards'}>
+                {tunnels.map((tunnel) => (
+                    <ConnectionCard
+                        key={tunnel.id}
+                        tunnel={tunnel}
+                        onChange={handleTunnelStateChange(profile, setProfile)}
+                    />
+                ))}
+            </div>
+        </div>
+    );
+}
 
 function ConnectionList() {
     const { isLoading, setProfile, profile } = useProfile();
     const navigate = useNavigate();
+
+    const [isGroupedView, setIsGroupedView] = useState(true);
+    const [isCompactView, setIsCompactView] = useState(false);
+    const [showConnectedOnly, setShowConnectedOnly] = useState(false);
+
+    const getConnectionView = () => {
+        if (isLoading) return [];
+
+        let flatTunnels = getFlatTunnels(profile) || [];
+
+        if (showConnectedOnly) {
+            flatTunnels = flatTunnels.filter(
+                (it) => it.connection?.status === ConnectionStatus.CONNECTED
+            );
+        }
+
+        if (isGroupedView) {
+            return Object.entries(
+                _.groupBy(flatTunnels, (it) => it.ssh_configuration_name)
+            ).map(([hostName, tunnels]) => (
+                <ConnectionGroup
+                    key={hostName}
+                    title={hostName}
+                    tunnels={tunnels}
+                    profile={profile}
+                    setProfile={setProfile}
+                />
+            ));
+        }
+
+        return flatTunnels.map((tunnel) => (
+            <ConnectionCard
+                key={tunnel.id}
+                tunnel={tunnel}
+                onChange={handleTunnelStateChange(profile, setProfile)}
+            />
+        ));
+    };
 
     const onAddClick = () => {
         navigate('/connection-details', {
@@ -29,18 +86,16 @@ function ConnectionList() {
 
     return (
         <div className={'connection-list-container'}>
-            <div className={'connection-list'}>
-                {!isLoading &&
-                    getFlatTunnels(profile)?.map((tunnel) => (
-                        <ConnectionCard
-                            key={tunnel.id}
-                            tunnel={tunnel}
-                            onChange={handleTunnelStateChange(
-                                profile,
-                                setProfile
-                            )}
-                        />
-                    ))}
+            <div
+                className={
+                    'connection-list' +
+                    (isGroupedView ? ' grouped' : '') +
+                    (isCompactView ? ' compact' : '')
+                }
+            >
+                <div className={'connection-list-items'}>
+                    {!isLoading && getConnectionView()}
+                </div>
                 <AddCardPlaceholder onClick={onAddClick} />
             </div>
         </div>

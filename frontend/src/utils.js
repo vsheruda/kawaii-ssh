@@ -1,4 +1,4 @@
-import { ConnectionStatus } from "./const.js";
+import { ConnectionStatus } from './const.js';
 
 const isSameTunnel = (t1) => (t2) => {
     return t1.id === t2.id;
@@ -33,9 +33,11 @@ const handleConnectionsStateChange = (profile, setProfile) => (connections) => {
             continue;
         }
 
-        console.log("Updating connection: ", tunnel, " with:", connection);
+        console.log('Updating connection: ', tunnel, ' with:', connection);
 
-        tunnel.connection.status = connection.is_connected ? ConnectionStatus.CONNECTED : ConnectionStatus.DISCONNECTED;
+        tunnel.connection.status = connection.is_connected
+            ? ConnectionStatus.CONNECTED
+            : ConnectionStatus.DISCONNECTED;
         tunnel.connection.stdout = connection.messages;
     }
 
@@ -115,7 +117,9 @@ const getFlatTunnels = (profile) => {
 };
 
 const hasOpenConnections = (tunnels) => {
-    return tunnels.some((tunnel) => tunnel.connection?.status === ConnectionStatus.CONNECTED);
+    return tunnels.some(
+        (tunnel) => tunnel.connection?.status === ConnectionStatus.CONNECTED
+    );
 };
 
 export {
@@ -125,5 +129,5 @@ export {
     getFlatTunnels,
     isSameTunnel,
     isSameSSHConfig,
-    hasOpenConnections
+    hasOpenConnections,
 };
