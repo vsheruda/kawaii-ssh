@@ -11,25 +11,25 @@ function NavPanel() {
     const { isSyncing } = useProfile();
     const location = useLocation();
 
-    const isSelected = (path) => path === location.pathname;
+    const isSelected = (paths) => paths.includes(location.pathname);
 
     return (
         <div className={'nav-panel'}>
             <Link
                 to={'/connection-list'}
-                className={`nav-item ${isSelected('/connection-list') && 'selected'}`}
+                className={`nav-item ${isSelected(['/', '/connection-list', '/connection-details']) && 'selected'}`}
             >
                 <PiPlugsConnectedFill title={'Connection List'} />
             </Link>
             <Link
                 to={'/host-settings'}
-                className={`nav-item ${isSelected('/host-settings') && 'selected'}`}
+                className={`nav-item ${isSelected(['/host-settings', '/host-settings-details']) && 'selected'}`}
             >
                 <IoDesktopSharp title={'Host Settings'} />
             </Link>
             <Link
                 to={'/system-health'}
-                className={`nav-item ${isSelected('/system-health') && 'selected'}`}
+                className={`nav-item ${isSelected(['/system-health']) && 'selected'}`}
             >
                 <MdElectricBolt title={'System Health'} />
             </Link>
