@@ -3,14 +3,14 @@ import './ConnectionList.css';
 
 import { useProfile } from '../../context/ProfileContext.jsx';
 import ConnectionCard from '../../components/ConnectionCard/ConnectionCard.jsx';
-import { getFlatTunnels, handleTunnelStateChange } from '../../utils.js';
+import { handleConnectionStateChange } from '../../utils.js';
 import AddCardPlaceholder from '../../components/AddCardPlaceholder/AddCardPlaceholder.jsx';
 import { useNavigate } from 'react-router';
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
 import { ConnectionStatus } from '../../const.js';
 
-function ConnectionGroup({ title, tunnels, setProfile, profile }) {
+function ConnectionGroup({ title, tunnels, setConnections }) {
     return (
         <div className={'connection-group'}>
             <span className={'title'}>{title}</span>
@@ -19,7 +19,7 @@ function ConnectionGroup({ title, tunnels, setProfile, profile }) {
                     <ConnectionCard
                         key={tunnel.id}
                         tunnel={tunnel}
-                        onChange={handleTunnelStateChange(profile, setProfile)}
+                        onChange={handleConnectionStateChange(tunnel, setConnections)}
                     />
                 ))}
             </div>
@@ -28,7 +28,7 @@ function ConnectionGroup({ title, tunnels, setProfile, profile }) {
 }
 
 function ConnectionList() {
-    const { isLoading, setProfile, profile } = useProfile();
+    const { isLoading, profile, setConnections } = useProfile();
     const navigate = useNavigate();
 
     const [isGroupedView, setIsGroupedView] = useState(true);
@@ -38,33 +38,32 @@ function ConnectionList() {
     const getConnectionView = () => {
         if (isLoading) return [];
 
-        let flatTunnels = getFlatTunnels(profile) || [];
+        let tunnels = profile.tunnels || [];
 
         if (showConnectedOnly) {
-            flatTunnels = flatTunnels.filter(
+            tunnels = tunnels.filter(
                 (it) => it.connection?.status === ConnectionStatus.CONNECTED
             );
         }
 
         if (isGroupedView) {
             return Object.entries(
-                _.groupBy(flatTunnels, (it) => it.ssh_configuration_name)
+                _.groupBy(tunnels, (it) => it.ssh_configuration_name)
             ).map(([hostName, tunnels]) => (
                 <ConnectionGroup
                     key={hostName}
                     title={hostName}
                     tunnels={tunnels}
-                    profile={profile}
-                    setProfile={setProfile}
+                    setConnections={setConnections}
                 />
             ));
         }
 
-        return flatTunnels.map((tunnel) => (
+        return tunnels.map((tunnel) => (
             <ConnectionCard
                 key={tunnel.id}
                 tunnel={tunnel}
-                onChange={handleTunnelStateChange(profile, setProfile)}
+                onChange={handleConnectionStateChange(tunnel, setConnections)}
             />
         ));
     };

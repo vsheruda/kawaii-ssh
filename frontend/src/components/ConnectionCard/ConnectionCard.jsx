@@ -31,15 +31,11 @@ function ConnectionCard({ tunnel, onChange }) {
 
         if (newEnabledState) {
             connect(tunnel)
-                .then((connectionState) =>
-                    onChange(tunnel, { connectionState })
-                )
+                .then(onChange)
                 .finally(() => setIsLoading(false));
         } else {
             disconnect(tunnel)
-                .then((connectionState) =>
-                    onChange(tunnel, { connectionState })
-                )
+                .then(onChange)
                 .finally(() => setIsLoading(false));
         }
     };

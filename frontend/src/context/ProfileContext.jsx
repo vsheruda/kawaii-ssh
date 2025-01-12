@@ -10,7 +10,8 @@ import {
     SaveProfile,
     GetConnections,
 } from '../../wailsjs/go/main/App.js';
-import { handleConnectionsStateChange, hasOpenConnections } from '../utils.js';
+import { handleConnectionsStateChange } from '../utils.js';
+import { ConnectionStatus } from "../const.js";
 
 const ProfileContext = createContext({});
 
@@ -24,6 +25,7 @@ export const ProfileProvider = ({ children }) => {
         ssh_configurations: [],
         tunnels: [],
     });
+    const [connections, setConnections] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [isSyncing, setIsSyncing] = useState(false);
     const debounceProfileSync = useRef(null);
@@ -39,8 +41,8 @@ export const ProfileProvider = ({ children }) => {
         );
 
     const onConnectionsStateChange = handleConnectionsStateChange(
-        profile,
-        setProfile
+        connections,
+        setConnections
     );
 
     useEffect(() => {
@@ -77,7 +79,7 @@ export const ProfileProvider = ({ children }) => {
     useEffect(() => {
         console.log('Updating connection states');
 
-        if (!hasOpenConnections(profile.tunnels)) {
+        if (Object.values(connections).filter(it => it.status === ConnectionStatus.CONNECTED).length === 0) {
             console.log('No open connections, skipping');
             scheduleUpdateConnectionsStates();
             return;
@@ -103,12 +105,25 @@ export const ProfileProvider = ({ children }) => {
     return (
         <ProfileContext.Provider
             value={{
-                profile,
                 setProfile,
+                // Assemble profile data for easier data access
+                profile: {
+                    ...profile,
+                    tunnels: [
+                        ...profile.tunnels.map((tunnel) => ({
+                            ...tunnel,
+                            connection: connections[tunnel.id],
+                            ssh_configuration: profile.ssh_configurations.find(
+                                (it) => it.name === tunnel.ssh_configuration_name
+                            ),
+                        })),
+                    ],
+                },
                 isLoading,
                 setIsLoading,
                 reloadProfile,
                 isSyncing,
+                setConnections,
             }}
         >
             {children}

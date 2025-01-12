@@ -27,7 +27,9 @@
     margin-bottom: 10px;
 }
 
-.connection-list-container .connection-list.grouped.compact .connection-list-items {
+.connection-list-container
+    .connection-list.grouped.compact
+    .connection-list-items {
     flex-flow: row wrap;
 }
 

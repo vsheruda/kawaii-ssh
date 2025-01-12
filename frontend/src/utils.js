@@ -13,20 +13,16 @@ const isSameSSHConfig = (c1) => (c2) => {
     );
 };
 
-const handleConnectionsStateChange = (profile, setProfile) => (connections) => {
+const handleConnectionsStateChange = (connections, setConnections) => (openConnections) => {
     // Reset connection status
-    for (let i = 0; i < profile.tunnels.length; i += 1) {
-        if (!profile.tunnels[i].connection) {
-            continue;
-        }
-
-        profile.tunnels[i].connection.status = ConnectionStatus.DISCONNECTED;
+    for (const key in connections) {
+        connections[key].status = ConnectionStatus.DISCONNECTED;
     }
 
     // Set newly fetched connection status
-    for (const connection of connections) {
-        const tunnel = profile.tunnels.find(
-            (it) => it.connection?.hash === connection.id
+    for (const connection of openConnections) {
+        const tunnel = Object.values(connections).find(
+            (it) => it.hash === connection.id
         );
 
         if (!tunnel) {
@@ -35,25 +31,27 @@ const handleConnectionsStateChange = (profile, setProfile) => (connections) => {
 
         console.log('Updating connection: ', tunnel, ' with:', connection);
 
-        tunnel.connection.status = connection.is_connected
+        tunnel.status = connection.is_connected
             ? ConnectionStatus.CONNECTED
             : ConnectionStatus.DISCONNECTED;
-        tunnel.connection.stdout = connection.messages;
+        tunnel.stdout = connection.messages;
     }
 
-    setProfile((prevState) => ({ ...prevState, tunnels: profile.tunnels }));
+    console.log('New connection state: ', connections);
+
+    setConnections((prevState) => ({ ...prevState, ...connections }));
+};
+
+const handleConnectionStateChange = (tunnel, setConnections) => (newState) => {
+    setConnections((prevState) => ({...prevState, [tunnel.id]: newState}));
 };
 
 const handleTunnelStateChange =
     (profile, setProfile) =>
-    (tunnel, { newState = null, connectionState = null, isNew = false }) => {
+    (tunnel, { newState = null, isNew = false }) => {
         const currentState = isNew
             ? {}
             : profile.tunnels.find(isSameTunnel(tunnel));
-
-        if (connectionState) {
-            currentState.connection = connectionState;
-        }
 
         if (newState) {
             currentState.id = currentState.id || newState.id; // They are expected to be the same
@@ -63,12 +61,6 @@ const handleTunnelStateChange =
             currentState.ssh_configuration_name =
                 newState.ssh_configuration_name;
         }
-
-        console.log(
-            `Tunnel ${currentState.local_port}:${currentState.remote_destination} changed state to`,
-            currentState.connection?.status,
-            currentState
-        );
 
         if (isNew) {
             profile.tunnels.push(currentState);
@@ -107,27 +99,11 @@ const handleSSHConfigurationStateChange =
         }));
     };
 
-const getFlatTunnels = (profile) => {
-    return profile.tunnels.map((tunnel) => ({
-        ...tunnel,
-        ssh_configuration: profile.ssh_configurations.find(
-            (it) => it.name === tunnel.ssh_configuration_name
-        ),
-    }));
-};
-
-const hasOpenConnections = (tunnels) => {
-    return tunnels.some(
-        (tunnel) => tunnel.connection?.status === ConnectionStatus.CONNECTED
-    );
-};
-
 export {
     handleTunnelStateChange,
     handleSSHConfigurationStateChange,
     handleConnectionsStateChange,
-    getFlatTunnels,
+    handleConnectionStateChange,
     isSameTunnel,
     isSameSSHConfig,
-    hasOpenConnections,
 };

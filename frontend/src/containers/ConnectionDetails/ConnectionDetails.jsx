@@ -5,7 +5,7 @@ import { ConnectionStatus } from '../../const.js';
 import { useLocation, useNavigate } from 'react-router';
 import { useProfile } from '../../context/ProfileContext.jsx';
 import {
-    getFlatTunnels,
+    handleConnectionStateChange,
     handleTunnelStateChange,
     isSameTunnel,
 } from '../../utils.js';
@@ -13,14 +13,14 @@ import { connect, disconnect } from '../../operations.js';
 
 function ConnectionDetails() {
     const location = useLocation();
-    const { setProfile, profile } = useProfile();
+    const { setProfile, profile, setConnections } = useProfile();
     const navigate = useNavigate();
 
     const onTunnelStateChange = handleTunnelStateChange(profile, setProfile);
 
-    let tunnel = getFlatTunnels(profile).find(
-        isSameTunnel(location.state.tunnel)
-    );
+    let tunnel = profile.tunnels.find(isSameTunnel(location.state.tunnel));
+
+    const onConnectionStateChange = handleConnectionStateChange(tunnel, setConnections);
 
     if (!tunnel) {
         tunnel = location.state.tunnel;
@@ -59,7 +59,7 @@ function ConnectionDetails() {
         });
 
         // Overwrite navigation state to fix hasChanged behavior.
-        location.state.tunnel = getFlatTunnels(profile).find(
+        location.state.tunnel = profile.tunnels.find(
             isSameTunnel(location.state.tunnel)
         );
         // Reset is new to enable connection
@@ -82,9 +82,7 @@ function ConnectionDetails() {
         setIsLoading(true);
 
         connect(tunnel)
-            .then((connectionState) =>
-                onTunnelStateChange(tunnel, { connectionState })
-            )
+            .then((connectionState) => onConnectionStateChange(connectionState))
             .finally(() => setIsLoading(false));
     };
 
@@ -92,9 +90,7 @@ function ConnectionDetails() {
         setIsLoading(true);
 
         disconnect(tunnel)
-            .then((connectionState) =>
-                onTunnelStateChange(tunnel, { connectionState })
-            )
+            .then((connectionState) => onConnectionStateChange(connectionState))
             .finally(() => setIsLoading(false));
     };
 
