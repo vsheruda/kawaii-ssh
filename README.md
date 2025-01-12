@@ -46,7 +46,8 @@ $ dlv debug --headless --listen=:2345 --api-version=2 --accept-multiclient --bui
 
 ## Issues
 
-- [ ] Decouple saving profile from tunnel connection state;
-- [ ] Log file is not saved;
 - [ ] Add connection list control panel (change view, filter)
+- [ ] Log file is not saved;
 - [ ] Add autocomplete for key paths;
+- [ ] Add more themes;
+- [ ] Add auto-reconnect toggle;
