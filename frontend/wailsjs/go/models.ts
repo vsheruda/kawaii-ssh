@@ -80,6 +80,20 @@ export namespace models {
 	        this.remoteDestination = source["remoteDestination"];
 	    }
 	}
+	export class ViewSettings {
+	    grouped: boolean;
+	    compact: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new ViewSettings(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.grouped = source["grouped"];
+	        this.compact = source["compact"];
+	    }
+	}
 	export class Tunnel {
 	    id: string;
 	    ssh_configuration_name: string;
@@ -121,6 +135,7 @@ export namespace models {
 	export class Profile {
 	    ssh_configurations: SSHConfiguration[];
 	    tunnels: Tunnel[];
+	    view_settings: ViewSettings;
 	
 	    static createFrom(source: any = {}) {
 	        return new Profile(source);
@@ -130,6 +145,7 @@ export namespace models {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.ssh_configurations = this.convertValues(source["ssh_configurations"], SSHConfiguration);
 	        this.tunnels = this.convertValues(source["tunnels"], Tunnel);
+	        this.view_settings = this.convertValues(source["view_settings"], ViewSettings);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -215,6 +231,7 @@ export namespace models {
 		    return a;
 		}
 	}
+	
 
 }
 

@@ -25,9 +25,15 @@ type Tunnel struct {
 	RemoteDestination    string `json:"remote_destination"`
 }
 
+type ViewSettings struct {
+	Grouped bool `json:"grouped"`
+	Compact bool `json:"compact"`
+}
+
 type Profile struct {
 	SSHConfigurations []SSHConfiguration `json:"ssh_configurations"`
 	Tunnels           []Tunnel           `json:"tunnels"`
+	ViewSettings      ViewSettings       `json:"view_settings"`
 }
 
 func saveProfile(path string, profile *Profile) error {
@@ -56,9 +62,13 @@ func saveProfile(path string, profile *Profile) error {
 
 func verifyProfileExists(path string) error {
 	_, err := os.Stat(path)
-	// TODO: add polling to catch timeout
+
 	if os.IsNotExist(err) {
-		emptyProfile := Profile{Tunnels: make([]Tunnel, 0), SSHConfigurations: make([]SSHConfiguration, 0)}
+		emptyProfile := Profile{
+			Tunnels:           make([]Tunnel, 0),
+			SSHConfigurations: make([]SSHConfiguration, 0),
+			ViewSettings:      ViewSettings{},
+		}
 
 		return saveProfile(path, &emptyProfile)
 	} else if err != nil {

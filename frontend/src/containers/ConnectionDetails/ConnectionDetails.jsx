@@ -20,7 +20,10 @@ function ConnectionDetails() {
 
     let tunnel = profile.tunnels.find(isSameTunnel(location.state.tunnel));
 
-    const onConnectionStateChange = handleConnectionStateChange(tunnel, setConnections);
+    const onConnectionStateChange = handleConnectionStateChange(
+        tunnel,
+        setConnections
+    );
 
     if (!tunnel) {
         tunnel = location.state.tunnel;

@@ -4,8 +4,38 @@
     overflow: scroll;
 }
 
+.connection-list-container .connection-list-control {
+    display: flex;
+    flex-direction: row-reverse;
+    padding: 12px 36px 0 36px;
+}
+
+.connection-list-container .connection-list-control .section {
+    display: flex;
+    width: fit-content;
+    border: 1px solid var(--color-background-secondary-60);
+    border-radius: 4px;
+    padding: 10px 12px 10px 12px;
+    margin-left: 12px;
+}
+
+.connection-list-container .connection-list-control .section span {
+    display: flex;
+    padding: 0 12px;
+    color: var(--color-background-secondary-60);
+    cursor: pointer;
+}
+
+.connection-list-container .connection-list-control .section span.active {
+    color: var(--color-accent-60);
+}
+
+.connection-list-container .connection-list-control .section span:hover {
+    color: var(--color-accent-60);
+}
+
 .connection-list-container .connection-list {
-    padding: 24px;
+    padding: 12px 24px 24px 24px;
     display: flex;
     flex: 1;
     flex-flow: column wrap;

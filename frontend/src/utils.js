@@ -13,37 +13,47 @@ const isSameSSHConfig = (c1) => (c2) => {
     );
 };
 
-const handleConnectionsStateChange = (connections, setConnections) => (openConnections) => {
-    // Reset connection status
-    for (const key in connections) {
-        connections[key].status = ConnectionStatus.DISCONNECTED;
-    }
+const handleViewSettingsChange =
+    (setProfile) =>
+    ({ grouped, compact }) => {
+        setProfile((prevState) => ({
+            ...prevState,
+            view_settings: { grouped, compact },
+        }));
+    };
 
-    // Set newly fetched connection status
-    for (const connection of openConnections) {
-        const tunnel = Object.values(connections).find(
-            (it) => it.hash === connection.id
-        );
-
-        if (!tunnel) {
-            continue;
+const handleConnectionsStateChange =
+    (connections, setConnections) => (openConnections) => {
+        // Reset connection status
+        for (const key in connections) {
+            connections[key].status = ConnectionStatus.DISCONNECTED;
         }
 
-        console.log('Updating connection: ', tunnel, ' with:', connection);
+        // Set newly fetched connection status
+        for (const connection of openConnections) {
+            const tunnel = Object.values(connections).find(
+                (it) => it.hash === connection.id
+            );
 
-        tunnel.status = connection.is_connected
-            ? ConnectionStatus.CONNECTED
-            : ConnectionStatus.DISCONNECTED;
-        tunnel.stdout = connection.messages;
-    }
+            if (!tunnel) {
+                continue;
+            }
 
-    console.log('New connection state: ', connections);
+            console.log('Updating connection: ', tunnel, ' with:', connection);
 
-    setConnections((prevState) => ({ ...prevState, ...connections }));
-};
+            tunnel.status = connection.is_connected
+                ? ConnectionStatus.CONNECTED
+                : ConnectionStatus.DISCONNECTED;
+            tunnel.stdout = connection.messages;
+        }
+
+        console.log('New connection state: ', connections);
+
+        setConnections((prevState) => ({ ...prevState, ...connections }));
+    };
 
 const handleConnectionStateChange = (tunnel, setConnections) => (newState) => {
-    setConnections((prevState) => ({...prevState, [tunnel.id]: newState}));
+    setConnections((prevState) => ({ ...prevState, [tunnel.id]: newState }));
 };
 
 const handleTunnelStateChange =
@@ -104,6 +114,7 @@ export {
     handleSSHConfigurationStateChange,
     handleConnectionsStateChange,
     handleConnectionStateChange,
+    handleViewSettingsChange,
     isSameTunnel,
     isSameSSHConfig,
 };

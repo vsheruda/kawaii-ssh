@@ -11,7 +11,7 @@ import {
     GetConnections,
 } from '../../wailsjs/go/main/App.js';
 import { handleConnectionsStateChange } from '../utils.js';
-import { ConnectionStatus } from "../const.js";
+import { ConnectionStatus } from '../const.js';
 
 const ProfileContext = createContext({});
 
@@ -79,7 +79,11 @@ export const ProfileProvider = ({ children }) => {
     useEffect(() => {
         console.log('Updating connection states');
 
-        if (Object.values(connections).filter(it => it.status === ConnectionStatus.CONNECTED).length === 0) {
+        if (
+            Object.values(connections).filter(
+                (it) => it.status === ConnectionStatus.CONNECTED
+            ).length === 0
+        ) {
             console.log('No open connections, skipping');
             scheduleUpdateConnectionsStates();
             return;
@@ -114,7 +118,8 @@ export const ProfileProvider = ({ children }) => {
                             ...tunnel,
                             connection: connections[tunnel.id],
                             ssh_configuration: profile.ssh_configurations.find(
-                                (it) => it.name === tunnel.ssh_configuration_name
+                                (it) =>
+                                    it.name === tunnel.ssh_configuration_name
                             ),
                         })),
                     ],

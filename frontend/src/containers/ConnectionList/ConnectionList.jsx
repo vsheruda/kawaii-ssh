@@ -3,12 +3,18 @@ import './ConnectionList.css';
 
 import { useProfile } from '../../context/ProfileContext.jsx';
 import ConnectionCard from '../../components/ConnectionCard/ConnectionCard.jsx';
-import { handleConnectionStateChange } from '../../utils.js';
+import {
+    handleConnectionStateChange,
+    handleViewSettingsChange,
+} from '../../utils.js';
 import AddCardPlaceholder from '../../components/AddCardPlaceholder/AddCardPlaceholder.jsx';
 import { useNavigate } from 'react-router';
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
 import { ConnectionStatus } from '../../const.js';
+import { HiOutlineCollection } from 'react-icons/hi';
+import { FaObjectUngroup, FaRegObjectGroup } from 'react-icons/fa';
+import { PiPlugsConnectedFill } from 'react-icons/pi';
 
 function ConnectionGroup({ title, tunnels, setConnections }) {
     return (
@@ -19,7 +25,10 @@ function ConnectionGroup({ title, tunnels, setConnections }) {
                     <ConnectionCard
                         key={tunnel.id}
                         tunnel={tunnel}
-                        onChange={handleConnectionStateChange(tunnel, setConnections)}
+                        onChange={handleConnectionStateChange(
+                            tunnel,
+                            setConnections
+                        )}
                     />
                 ))}
             </div>
@@ -28,12 +37,18 @@ function ConnectionGroup({ title, tunnels, setConnections }) {
 }
 
 function ConnectionList() {
-    const { isLoading, profile, setConnections } = useProfile();
+    const { isLoading, profile, setProfile, setConnections } = useProfile();
     const navigate = useNavigate();
 
-    const [isGroupedView, setIsGroupedView] = useState(true);
-    const [isCompactView, setIsCompactView] = useState(false);
+    const [isGroupedView, setIsGroupedView] = useState(
+        profile.view_settings.grouped
+    );
+    const [isCompactView, setIsCompactView] = useState(
+        profile.view_settings.compact
+    );
     const [showConnectedOnly, setShowConnectedOnly] = useState(false);
+
+    const onViewSettingsChange = handleViewSettingsChange(setProfile);
 
     const getConnectionView = () => {
         if (isLoading) return [];
@@ -85,6 +100,63 @@ function ConnectionList() {
 
     return (
         <div className={'connection-list-container'}>
+            <div className={'connection-list-control'}>
+                <div className={'section'}>
+                    <span
+                        className={!isGroupedView && !isCompactView && 'active'}
+                        title={'List view'}
+                        onClick={() => {
+                            setIsGroupedView(false);
+                            setIsCompactView(false);
+                            onViewSettingsChange({
+                                grouped: false,
+                                compact: false,
+                            });
+                        }}
+                    >
+                        <HiOutlineCollection />
+                    </span>
+                    <span
+                        className={isGroupedView && !isCompactView && 'active'}
+                        title={'Group view'}
+                        onClick={() => {
+                            setIsGroupedView(true);
+                            setIsCompactView(false);
+                            onViewSettingsChange({
+                                grouped: true,
+                                compact: false,
+                            });
+                        }}
+                    >
+                        <FaRegObjectGroup />
+                    </span>
+                    <span
+                        className={isGroupedView && isCompactView && 'active'}
+                        title={'Compact group view'}
+                        onClick={() => {
+                            setIsGroupedView(true);
+                            setIsCompactView(true);
+                            onViewSettingsChange({
+                                grouped: true,
+                                compact: true,
+                            });
+                        }}
+                    >
+                        <FaObjectUngroup />
+                    </span>
+                </div>
+                <div className={'section'}>
+                    <span
+                        className={showConnectedOnly && 'active'}
+                        title={'Show connected only'}
+                        onClick={() => {
+                            setShowConnectedOnly(!showConnectedOnly);
+                        }}
+                    >
+                        <PiPlugsConnectedFill />
+                    </span>
+                </div>
+            </div>
             <div
                 className={
                     'connection-list' +
