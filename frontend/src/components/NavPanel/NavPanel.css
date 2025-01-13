@@ -7,7 +7,7 @@
 .nav-panel {
     width: 100%;
     background-color: var(--color-background-secondary);
-    border-radius: 14px;
+    border-radius: 10px;
     display: flex;
     flex-direction: column;
     height: 100%;
