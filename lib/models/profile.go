@@ -67,7 +67,7 @@ func verifyProfileExists(path string) error {
 		emptyProfile := Profile{
 			Tunnels:           make([]Tunnel, 0),
 			SSHConfigurations: make([]SSHConfiguration, 0),
-			ViewSettings:      ViewSettings{},
+			ViewSettings:      ViewSettings{Grouped: false, Compact: false},
 		}
 
 		return saveProfile(path, &emptyProfile)

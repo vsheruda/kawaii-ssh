@@ -40,12 +40,8 @@ function ConnectionList() {
     const { isLoading, profile, setProfile, setConnections } = useProfile();
     const navigate = useNavigate();
 
-    const [isGroupedView, setIsGroupedView] = useState(
-        profile.view_settings.grouped
-    );
-    const [isCompactView, setIsCompactView] = useState(
-        profile.view_settings.compact
-    );
+    const isCompactView = profile?.view_settings?.compact;
+    const isGroupedView = profile?.view_settings?.grouped;
     const [showConnectedOnly, setShowConnectedOnly] = useState(false);
 
     const onViewSettingsChange = handleViewSettingsChange(setProfile);
@@ -106,8 +102,6 @@ function ConnectionList() {
                         className={!isGroupedView && !isCompactView && 'active'}
                         title={'List view'}
                         onClick={() => {
-                            setIsGroupedView(false);
-                            setIsCompactView(false);
                             onViewSettingsChange({
                                 grouped: false,
                                 compact: false,
@@ -120,8 +114,6 @@ function ConnectionList() {
                         className={isGroupedView && !isCompactView && 'active'}
                         title={'Group view'}
                         onClick={() => {
-                            setIsGroupedView(true);
-                            setIsCompactView(false);
                             onViewSettingsChange({
                                 grouped: true,
                                 compact: false,
@@ -134,8 +126,6 @@ function ConnectionList() {
                         className={isGroupedView && isCompactView && 'active'}
                         title={'Compact group view'}
                         onClick={() => {
-                            setIsGroupedView(true);
-                            setIsCompactView(true);
                             onViewSettingsChange({
                                 grouped: true,
                                 compact: true,
