@@ -143,6 +143,7 @@ func (a *App) GetProfile() models.ProfileResponse {
 
 	return models.ProfileResponse{
 		Profile:      *profile,
+		Version:      Version,
 		ResponseCode: 200,
 	}
 }

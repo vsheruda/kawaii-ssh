@@ -21,6 +21,7 @@ export const ProfileProvider = ({ children }) => {
     const [forceProfileReload, setForceProfileReload] = useState(0);
     const [forceConnectionStateUpdate, setForceConnectionStateUpdate] =
         useState(0);
+    const [version, setVersion] = useState("");
     const [profile, setProfile] = useState({
         ssh_configurations: [],
         tunnels: [],
@@ -67,10 +68,11 @@ export const ProfileProvider = ({ children }) => {
         setIsLoading(true);
 
         GetProfile()
-            .then(({ profile }) => {
+            .then(({ profile, version }) => {
                 console.log('Loaded profile', profile);
 
                 setProfile(profile);
+                setVersion(version);
             })
             .catch(console.error)
             .finally(() => setIsLoading(false));
@@ -109,6 +111,7 @@ export const ProfileProvider = ({ children }) => {
     return (
         <ProfileContext.Provider
             value={{
+                version,
                 setProfile,
                 // Assemble profile data for easier data access
                 profile: {

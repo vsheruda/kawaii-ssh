@@ -8,7 +8,7 @@ import { Link, useLocation } from 'react-router';
 import { useProfile } from '../../context/ProfileContext.jsx';
 
 function NavPanel() {
-    const { isSyncing } = useProfile();
+    const { isSyncing, version } = useProfile();
     const location = useLocation();
 
     const isSelected = (paths) => paths.includes(location.pathname);
@@ -33,7 +33,10 @@ function NavPanel() {
             >
                 <MdElectricBolt title={'System Health'} />
             </Link>
-            {isSyncing && <IoIosSave className={'nav-item sync-progress'} />}
+            <div className={"nav-item bottom"}>
+                {isSyncing && <IoIosSave className={'sync-progress'} />}
+                {version && <span className={'version'}>v{version}</span>}
+            </div>
         </div>
     );
 }

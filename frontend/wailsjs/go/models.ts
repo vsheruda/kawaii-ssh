@@ -169,6 +169,7 @@ export namespace models {
 	export class ProfileResponse {
 	    responseCode: number;
 	    profile: Profile;
+	    version: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new ProfileResponse(source);
@@ -178,6 +179,7 @@ export namespace models {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.responseCode = source["responseCode"];
 	        this.profile = this.convertValues(source["profile"], Profile);
+	        this.version = source["version"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

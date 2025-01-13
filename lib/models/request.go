@@ -19,6 +19,7 @@ type ConnectResponse struct {
 type ProfileResponse struct {
 	ResponseCode int16   `json:"responseCode" required:"true"`
 	Profile      Profile `json:"profile"`
+	Version      string  `json:"version"`
 }
 
 type OpenTunnel struct {

@@ -35,12 +35,25 @@
     }
 }
 
-.nav-item.sync-progress {
+.nav-item.bottom {
     border-bottom: none;
     color: var(--color-accent);
     opacity: 1;
     cursor: default;
     margin-top: auto;
-    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    font-size: 20px;
+    align-items: center;
+}
+
+.nav-item.bottom .sync-progress {
     animation: blink 2s infinite;
+    margin-bottom: 10px;
+}
+
+.nav-item.bottom .version {
+    color: var(--color-accent-60);
+    font-size: 12px;
+    margin-bottom: 5px;
 }
