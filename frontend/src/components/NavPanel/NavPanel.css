@@ -1,7 +1,13 @@
-.nav-panel {
+.nav-panel-container {
+    display: flex;
+    margin: 10px 0 10px 10px;
     width: 5%;
-    border-right: 1px solid var(--color-accent-60);
+}
+
+.nav-panel {
+    width: 100%;
     background-color: var(--color-background-secondary);
+    border-radius: 14px;
     display: flex;
     flex-direction: column;
     height: 100%;

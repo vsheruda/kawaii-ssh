@@ -28,7 +28,7 @@ func main() {
 	// Create application with options
 	err := wails.Run(&options.App{
 		Title:  "KawaiiSSH",
-		Width:  854,
+		Width:  864,
 		Height: 480,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
