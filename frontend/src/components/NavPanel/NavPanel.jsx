@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './NavPanel.css';
 import { IoDesktopSharp } from 'react-icons/io5';
 import { MdElectricBolt } from 'react-icons/md';
@@ -6,12 +6,27 @@ import { PiPlugsConnectedFill } from 'react-icons/pi';
 import { IoIosSave } from 'react-icons/io';
 import { Link, useLocation } from 'react-router';
 import { useProfile } from '../../context/ProfileContext.jsx';
+import { VscPaintcan } from "react-icons/vsc";
+
+const THEMES = ["", "light", "vintage-modern", "neon", "pink"];
 
 function NavPanel() {
     const { isSyncing, version } = useProfile();
     const location = useLocation();
 
+    const [themeIndex, setThemeIndex] = useState(0);
+
     const isSelected = (paths) => paths.includes(location.pathname);
+
+    const changeTheme = () => {
+        if (themeIndex >= THEMES.length - 1) {
+            setThemeIndex(0);
+        } else {
+            setThemeIndex(themeIndex + 1);
+        }
+    }
+
+    document.documentElement.className = THEMES[themeIndex];
 
     return (
         <div className={ 'nav-panel-container' }>
@@ -36,6 +51,7 @@ function NavPanel() {
                 </Link>
                 <div className={ "nav-item bottom" }>
                     { isSyncing && <IoIosSave className={ 'sync-progress' }/> }
+                    <VscPaintcan className={ 'theme' } onClick={changeTheme}/>
                     { version && <span className={ 'version' }>v{ version }</span> }
                 </div>
             </div>

@@ -48,7 +48,6 @@ $ dlv debug --headless --listen=:2345 --api-version=2 --accept-multiclient --bui
 
 - [ ] Log file is not saved;
 - [ ] Add autocomplete for key paths;
-- [ ] Add more themes;
 - [ ] Add auto-reconnect toggle;
 - [ ] Add header on the connection list tab;
 - [ ] Add test functionality for host settings;

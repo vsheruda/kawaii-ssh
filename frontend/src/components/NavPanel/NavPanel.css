@@ -63,3 +63,14 @@
     font-size: 12px;
     margin-bottom: 5px;
 }
+
+.nav-item.bottom .theme {
+    cursor: pointer;
+    margin-bottom: 10px;
+    color: var(--color-text);
+    opacity: 0.6;
+}
+
+.nav-item.bottom .theme:hover {
+    opacity: 1;
+}
