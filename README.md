@@ -50,4 +50,6 @@ $ dlv debug --headless --listen=:2345 --api-version=2 --accept-multiclient --bui
 - [ ] Add autocomplete for key paths;
 - [ ] Add auto-reconnect toggle;
 - [ ] Add header on the connection list tab;
+- [ ] Group by tags;
+- [ ] Add names to the connections;
 - [ ] Add test functionality for host settings;
