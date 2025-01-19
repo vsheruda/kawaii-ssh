@@ -7,6 +7,16 @@ import { IoDesktopSharp, IoSettingsSharp } from 'react-icons/io5';
 import { useNavigate } from 'react-router';
 import { connect, disconnect } from '../../operations.js';
 
+const NAME_LOOKUP_MAP = {
+    "6379": "Redis",
+    "5432": "PostgreSQL",
+    "3306": "MySQL",
+    "5439": "Redshift",
+    "443": "HTTPS",
+    "80": "HTTP",
+};
+
+
 function ConnectionCard({ tunnel, onChange }) {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
@@ -40,11 +50,15 @@ function ConnectionCard({ tunnel, onChange }) {
         }
     };
 
+    const getCardName = (tunnel) => {
+      return NAME_LOOKUP_MAP[tunnel.remote_port] || tunnel.local_port;
+    };
+
     return (
         <div className={`connection-card-container ${isLoading && 'loading'}`}>
             <div className={'connection-card'}>
                 <div className={'port-container'}>
-                    <span className={'port'}>{tunnel.local_port}</span>
+                    <span className={'port'}>{getCardName(tunnel)}</span>
                     <Toggle
                         checked={isEnabled || isLoading}
                         disabled={isLoading}
