@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './NavPanel.css';
 import { IoDesktopSharp } from 'react-icons/io5';
 import { MdElectricBolt } from 'react-icons/md';
-import { PiPlugsConnectedFill } from 'react-icons/pi';
+import { PiPlugsConnectedFill, PiPackageDuotone } from 'react-icons/pi';
 import { IoIosSave } from 'react-icons/io';
 import { Link, useLocation } from 'react-router';
 import { useProfile } from '../../context/ProfileContext.jsx';
@@ -36,6 +36,12 @@ function NavPanel() {
                     className={`nav-item ${isSelected(['/', '/connection-list', '/connection-details']) && 'selected'}`}
                 >
                     <PiPlugsConnectedFill title={'Connection List'} />
+                </Link>
+                <Link
+                    to={'/application-list'}
+                    className={`nav-item ${isSelected(['/application-list', '/application-details']) && 'selected'}`}
+                >
+                    <PiPackageDuotone title={'Application List'} />
                 </Link>
                 <Link
                     to={'/host-settings'}

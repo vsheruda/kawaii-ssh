@@ -1,0 +1,18 @@
+.application-list-container {
+    width: 95%;
+    height: 100%;
+    overflow: scroll;
+}
+
+.application-list-container .application-list {
+    padding: 12px 24px 24px 24px;
+    display: flex;
+    flex: 1;
+    flex-flow: column wrap;
+    justify-content: flex-start;
+}
+
+.application-list-container .application-list .items {
+    display: flex;
+    flex-flow: row wrap;
+}

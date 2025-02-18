@@ -1,0 +1,18 @@
+.application-details-container {
+    width: 95%;
+    height: 100%;
+    overflow: scroll;
+}
+
+.application-details-container .application-details {
+    padding: 12px 24px 24px 24px;
+    display: flex;
+    flex: 1;
+    flex-flow: column wrap;
+    justify-content: flex-start;
+}
+
+/*.application-details-container .application-details .items {*/
+/*    display: flex;*/
+/*    flex-flow: row wrap;*/
+/*}*/
