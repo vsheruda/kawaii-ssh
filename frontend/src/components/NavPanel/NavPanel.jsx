@@ -6,9 +6,9 @@ import { PiPlugsConnectedFill } from 'react-icons/pi';
 import { IoIosSave } from 'react-icons/io';
 import { Link, useLocation } from 'react-router';
 import { useProfile } from '../../context/ProfileContext.jsx';
-import { VscPaintcan } from "react-icons/vsc";
+import { VscPaintcan } from 'react-icons/vsc';
 
-const THEMES = ["", "light", "vintage-modern", "neon", "pink"];
+const THEMES = ['', 'light', 'vintage-modern', 'neon', 'pink'];
 
 function NavPanel() {
     const { isSyncing, version } = useProfile();
@@ -24,35 +24,35 @@ function NavPanel() {
         } else {
             setThemeIndex(themeIndex + 1);
         }
-    }
+    };
 
     document.documentElement.className = THEMES[themeIndex];
 
     return (
-        <div className={ 'nav-panel-container' }>
-            <div className={ 'nav-panel' }>
+        <div className={'nav-panel-container'}>
+            <div className={'nav-panel'}>
                 <Link
-                    to={ '/connection-list' }
-                    className={ `nav-item ${ isSelected(['/', '/connection-list', '/connection-details']) && 'selected' }` }
+                    to={'/connection-list'}
+                    className={`nav-item ${isSelected(['/', '/connection-list', '/connection-details']) && 'selected'}`}
                 >
-                    <PiPlugsConnectedFill title={ 'Connection List' }/>
+                    <PiPlugsConnectedFill title={'Connection List'} />
                 </Link>
                 <Link
-                    to={ '/host-settings' }
-                    className={ `nav-item ${ isSelected(['/host-settings', '/host-settings-details']) && 'selected' }` }
+                    to={'/host-settings'}
+                    className={`nav-item ${isSelected(['/host-settings', '/host-settings-details']) && 'selected'}`}
                 >
-                    <IoDesktopSharp title={ 'Host Settings' }/>
+                    <IoDesktopSharp title={'Host Settings'} />
                 </Link>
                 <Link
-                    to={ '/system-health' }
-                    className={ `nav-item ${ isSelected(['/system-health']) && 'selected' }` }
+                    to={'/system-health'}
+                    className={`nav-item ${isSelected(['/system-health']) && 'selected'}`}
                 >
-                    <MdElectricBolt title={ 'System Health' }/>
+                    <MdElectricBolt title={'System Health'} />
                 </Link>
-                <div className={ "nav-item bottom" }>
-                    { isSyncing && <IoIosSave className={ 'sync-progress' }/> }
-                    <VscPaintcan className={ 'theme' } onClick={changeTheme}/>
-                    { version && <span className={ 'version' }>v{ version }</span> }
+                <div className={'nav-item bottom'}>
+                    {isSyncing && <IoIosSave className={'sync-progress'} />}
+                    <VscPaintcan className={'theme'} onClick={changeTheme} />
+                    {version && <span className={'version'}>v{version}</span>}
                 </div>
             </div>
         </div>

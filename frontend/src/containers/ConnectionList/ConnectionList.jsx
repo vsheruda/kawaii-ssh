@@ -99,7 +99,9 @@ function ConnectionList() {
             <div className={'connection-list-control'}>
                 <div className={'section'}>
                     <span
-                        className={!isGroupedView && !isCompactView && 'active'}
+                        className={
+                            !isGroupedView && !isCompactView ? 'active' : ''
+                        }
                         title={'List view'}
                         onClick={() => {
                             onViewSettingsChange({
@@ -111,7 +113,9 @@ function ConnectionList() {
                         <HiOutlineCollection />
                     </span>
                     <span
-                        className={isGroupedView && !isCompactView && 'active'}
+                        className={
+                            isGroupedView && !isCompactView ? 'active' : ''
+                        }
                         title={'Group view'}
                         onClick={() => {
                             onViewSettingsChange({
@@ -123,7 +127,9 @@ function ConnectionList() {
                         <FaRegObjectGroup />
                     </span>
                     <span
-                        className={isGroupedView && isCompactView && 'active'}
+                        className={
+                            isGroupedView && isCompactView ? 'active' : ''
+                        }
                         title={'Compact group view'}
                         onClick={() => {
                             onViewSettingsChange({
@@ -137,7 +143,7 @@ function ConnectionList() {
                 </div>
                 <div className={'section'}>
                     <span
-                        className={showConnectedOnly && 'active'}
+                        className={showConnectedOnly ? 'active' : ''}
                         title={'Show connected only'}
                         onClick={() => {
                             setShowConnectedOnly(!showConnectedOnly);

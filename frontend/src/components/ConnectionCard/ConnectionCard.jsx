@@ -8,14 +8,13 @@ import { useNavigate } from 'react-router';
 import { connect, disconnect } from '../../operations.js';
 
 const NAME_LOOKUP_MAP = {
-    "6379": "Redis",
-    "5432": "PostgreSQL",
-    "3306": "MySQL",
-    "5439": "Redshift",
-    "443": "HTTPS",
-    "80": "HTTP",
+    6379: 'Redis',
+    5432: 'PostgreSQL',
+    3306: 'MySQL',
+    5439: 'Redshift',
+    443: 'HTTPS',
+    80: 'HTTP',
 };
-
 
 function ConnectionCard({ tunnel, onChange }) {
     const navigate = useNavigate();
@@ -51,7 +50,7 @@ function ConnectionCard({ tunnel, onChange }) {
     };
 
     const getCardName = (tunnel) => {
-      return NAME_LOOKUP_MAP[tunnel.remote_port] || tunnel.local_port;
+        return NAME_LOOKUP_MAP[tunnel.remote_port] || tunnel.local_port;
     };
 
     return (
