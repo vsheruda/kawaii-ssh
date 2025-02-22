@@ -21,10 +21,11 @@ export const ProfileProvider = ({ children }) => {
     const [forceProfileReload, setForceProfileReload] = useState(0);
     const [forceConnectionStateUpdate, setForceConnectionStateUpdate] =
         useState(0);
-    const [version, setVersion] = useState("");
+    const [version, setVersion] = useState('');
     const [profile, setProfile] = useState({
         ssh_configurations: [],
         tunnels: [],
+        applications: [],
     });
     const [connections, setConnections] = useState({});
     const [isLoading, setIsLoading] = useState(false);
@@ -79,21 +80,18 @@ export const ProfileProvider = ({ children }) => {
     }, [forceProfileReload]);
 
     useEffect(() => {
-        console.log('Updating connection states');
-
-        if (
+        const hasOpenConnections =
             Object.values(connections).filter(
                 (it) => it.status === ConnectionStatus.CONNECTED
-            ).length === 0
-        ) {
-            console.log('No open connections, skipping');
+            ).length === 0;
+
+        if (hasOpenConnections) {
             scheduleUpdateConnectionsStates();
             return;
         }
 
-        console.log('Fetching connection states');
         GetConnections().then((response) => {
-            console.log('Fetched connection states', response);
+            console.log('Fetched connection states', response, profile.tunnels);
             onConnectionsStateChange(response);
 
             scheduleUpdateConnectionsStates();
@@ -126,6 +124,7 @@ export const ProfileProvider = ({ children }) => {
                             ),
                         })),
                     ],
+                    applications: profile.applications,
                 },
                 isLoading,
                 setIsLoading,

@@ -31,7 +31,6 @@ function HostSettingsList() {
                         <HostSettingsCard
                             key={index}
                             sshConfiguration={it}
-                            onChange={console.log}
                         />
                     ))}
                 <AddCardPlaceholder onClick={onAddClick} />

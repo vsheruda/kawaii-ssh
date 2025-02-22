@@ -1,4 +1,5 @@
 import { ConnectionStatus } from './const.js';
+import app from './App.jsx';
 
 const isSameTunnel = (t1) => (t2) => {
     return t1.id === t2.id;
@@ -109,12 +110,48 @@ const handleSSHConfigurationStateChange =
         }));
     };
 
+const handleApplicationConfigurationStateChange =
+    (profile, setProfile) =>
+    (application, { name, tunnelIds }, isNew = false) => {
+        const currentState = isNew
+            ? { id: application.id }
+            : profile.applications.find((it) => it.id === application.id);
+
+        console.log(
+            'Updating Applications configuration: ',
+            currentState,
+            ` to: name=${name} tunnel_ids=${tunnelIds}`
+        );
+
+        currentState.name = name;
+        currentState.tunnel_ids = tunnelIds;
+
+        if (isNew) {
+            profile.applications.push(currentState);
+        }
+
+        setProfile((prevState) => ({
+            ...prevState,
+            applications: profile.applications,
+        }));
+    };
+
+const getValueOrSubstr = (value, limit, suffix = '...') => {
+    if (value.length <= limit) {
+        return value;
+    }
+
+    return value.substring(0, limit) + suffix;
+};
+
 export {
     handleTunnelStateChange,
     handleSSHConfigurationStateChange,
     handleConnectionsStateChange,
     handleConnectionStateChange,
     handleViewSettingsChange,
+    handleApplicationConfigurationStateChange,
     isSameTunnel,
     isSameSSHConfig,
+    getValueOrSubstr,
 };

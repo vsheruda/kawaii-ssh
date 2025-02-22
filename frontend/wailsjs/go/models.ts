@@ -1,5 +1,21 @@
 export namespace models {
 	
+	export class Application {
+	    id: string;
+	    name: string;
+	    tunnel_ids: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Application(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.tunnel_ids = source["tunnel_ids"];
+	    }
+	}
 	export class ConnectPayload {
 	    Host: string;
 	    Username: string;
@@ -136,6 +152,7 @@ export namespace models {
 	    ssh_configurations: SSHConfiguration[];
 	    tunnels: Tunnel[];
 	    view_settings: ViewSettings;
+	    applications: Application[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Profile(source);
@@ -146,6 +163,7 @@ export namespace models {
 	        this.ssh_configurations = this.convertValues(source["ssh_configurations"], SSHConfiguration);
 	        this.tunnels = this.convertValues(source["tunnels"], Tunnel);
 	        this.view_settings = this.convertValues(source["view_settings"], ViewSettings);
+	        this.applications = this.convertValues(source["applications"], Application);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

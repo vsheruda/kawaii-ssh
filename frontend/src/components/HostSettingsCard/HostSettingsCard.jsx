@@ -16,7 +16,7 @@ const toHostName = (it) => {
 
 const toKeyName = (it) => it.split('/').reverse()[0].slice(0, 27);
 
-function HostSettingsCard({ sshConfiguration, onChange }) {
+function HostSettingsCard({ sshConfiguration }) {
     const navigate = useNavigate();
 
     const onClick = () =>

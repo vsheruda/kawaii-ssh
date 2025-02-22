@@ -8,6 +8,7 @@
     --color-text-secondary: #e3dc95;
     --color-accent: #a6a867;
     --color-accent-60: rgb(166, 168, 103, 0.6);
+    --color-accent-40: rgb(166, 168, 103, 0.4);
     --color-shadow: rgba(0, 0, 0, 0.17);
 }
 
@@ -21,6 +22,7 @@
     --color-text-secondary: #4b4b4b;
     --color-accent: #0066cc;
     --color-accent-60: rgba(0, 102, 204, 0.6);
+    --color-accent-40: rgba(0, 102, 204, 0.4);
     --color-shadow: rgba(0, 0, 0, 0.17);
 }
 
@@ -34,6 +36,7 @@
     --color-text-secondary: #d90429;
     --color-accent: #ef233c;
     --color-accent-60: rgba(239, 35, 60, 0.6);
+    --color-accent-40: rgba(239, 35, 60, 0.4);
     --color-shadow: rgba(0, 0, 0, 0.25);
 }
 
@@ -47,6 +50,7 @@
     --color-text-secondary: #ff8906;
     --color-accent: #f25f4c;
     --color-accent-60: rgba(242, 95, 76, 0.6);
+    --color-accent-40: rgba(242, 95, 76, 0.4);
     --color-shadow: rgba(255, 255, 255, 0.15);
 }
 
@@ -60,6 +64,7 @@
     --color-text-secondary: #a86e7a;
     --color-accent: #f8a2c4;
     --color-accent-60: rgba(248, 162, 196, 0.6);
+    --color-accent-40: rgba(248, 162, 196, 0.4);
     --color-shadow: rgba(150, 111, 85, 0.2);
 }
 
@@ -179,4 +184,24 @@ button:hover {
 
 h2 {
     margin: 0 0 12px 0;
+}
+
+.react-toggle .react-toggle-track {
+    background-color: var(--color-background);
+}
+
+.react-toggle:hover:not(.react-toggle--checked) .react-toggle-track {
+    background-color: var(--color-background-80) !important;
+}
+
+.react-toggle--checked .react-toggle-track {
+    background-color: var(--color-accent) !important;
+}
+
+.react-toggle--checked:hover .react-toggle-track {
+    background-color: var(--color-accent-60) !important;
+}
+
+.react-toggle--checked:hover:not(.react-toggle--disabled) .react-toggle-track {
+    background-color: var(--color-accent);
 }

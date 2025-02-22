@@ -37,30 +37,6 @@
     justify-content: space-between;
 }
 
-.port-container .react-toggle .react-toggle-track {
-    background-color: var(--color-background);
-}
-
-.port-container
-    .react-toggle:hover:not(.react-toggle--checked)
-    .react-toggle-track {
-    background-color: var(--color-background-80) !important;
-}
-
-.port-container .react-toggle--checked:hover .react-toggle-track {
-    background-color: var(--color-accent-60) !important;
-}
-
-.port-container .react-toggle--checked .react-toggle-track {
-    background-color: var(--color-accent);
-}
-
-.port-container
-    .react-toggle--checked:hover:not(.react-toggle--disabled)
-    .react-toggle-track {
-    background-color: var(--color-accent);
-}
-
 .connection-card .port {
     font-size: 18px;
     line-height: 1.8em;

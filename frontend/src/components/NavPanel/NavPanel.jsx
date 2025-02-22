@@ -32,16 +32,16 @@ function NavPanel() {
         <div className={'nav-panel-container'}>
             <div className={'nav-panel'}>
                 <Link
-                    to={'/connection-list'}
-                    className={`nav-item ${isSelected(['/', '/connection-list', '/connection-details']) && 'selected'}`}
-                >
-                    <PiPlugsConnectedFill title={'Connection List'} />
-                </Link>
-                <Link
                     to={'/application-list'}
-                    className={`nav-item ${isSelected(['/application-list', '/application-details']) && 'selected'}`}
+                    className={`nav-item ${isSelected(['/', '/application-list', '/application-details']) && 'selected'}`}
                 >
                     <PiPackageDuotone title={'Application List'} />
+                </Link>
+                <Link
+                    to={'/connection-list'}
+                    className={`nav-item ${isSelected(['/connection-list', '/connection-details']) && 'selected'}`}
+                >
+                    <PiPlugsConnectedFill title={'Connection List'} />
                 </Link>
                 <Link
                     to={'/host-settings'}

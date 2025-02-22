@@ -67,11 +67,11 @@
 }
 
 .status-circle {
-    margin: 8px 0 8px 0;
+    margin: 6px 0 8px 0;
     display: block;
     width: 8px;
     height: 8px;
-    border-radius: 50%;
+    border-radius: 2px;
     background-color: var(--color-background-secondary);
 }
 

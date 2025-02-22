@@ -5,14 +5,144 @@
 }
 
 .application-details-container .application-details {
+    margin-left: 80px;
+    width: 80%;
     padding: 12px 24px 24px 24px;
     display: flex;
     flex: 1;
     flex-flow: column wrap;
-    justify-content: flex-start;
+    align-items: center;
+    justify-content: center;
 }
 
-/*.application-details-container .application-details .items {*/
-/*    display: flex;*/
-/*    flex-flow: row wrap;*/
-/*}*/
+.application-details-container .application-details .row {
+    width: 100%;
+}
+
+.application-details-container .application-details .row.header {
+    flex-direction: column;
+    font-size: 14px;
+}
+
+.application-details-container .application-details .row label {
+    margin-right: 5px;
+    font-size: 12px;
+    line-height: 22px;
+    width: 20%;
+}
+
+.application-details-container .application-details .row .input {
+    width: 70%;
+}
+
+.application-details-container .application-details .row input {
+    width: calc(100% - 20px);
+}
+
+.application-details-container .application-details .row {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    margin-top: 25px;
+}
+
+.application-details-container
+    .application-details
+    .row
+    .tunnels-select__indicator {
+    color: var(--color-accent);
+}
+
+.application-details-container
+    .application-details
+    .row
+    .tunnels-select__indicator:hover {
+    color: var(--color-accent-60);
+}
+
+.application-details-container
+    .application-details
+    .row
+    .tunnels-select__control:hover {
+    background-color: var(--color-background-secondary);
+}
+
+.application-details-container
+    .application-details
+    .row
+    .tunnels-select__control.tunnels-select__control--is-focused {
+    outline: none;
+    border: none;
+    box-shadow: none;
+}
+
+.application-details-container
+    .application-details
+    .row
+    .tunnels-select__control {
+    border: none;
+    border-radius: 2px;
+    outline: none;
+    background-color: var(--color-background-secondary-80);
+}
+
+.application-details-container
+    .application-details
+    .row
+    .tunnels-select__input-container {
+    color: var(--color-text);
+}
+
+.application-details-container
+    .application-details
+    .row
+    .tunnels-select__group-heading {
+    color: var(--color-text-secondary);
+}
+
+.application-details-container
+    .application-details
+    .row
+    .tunnels-select__menu-list {
+    background-color: var(--color-background-secondary-80);
+}
+
+.application-details-container
+    .application-details
+    .row
+    .tunnels-select__option--is-focused {
+    background-color: var(--color-background-secondary-60);
+}
+
+.application-details-container
+    .application-details
+    .row
+    .tunnels-select__multi-value {
+    background-color: var(--color-accent-60);
+}
+
+.application-details-container
+    .application-details
+    .row
+    .tunnels-select__multi-value__label {
+    color: var(--color-text);
+}
+
+.application-details-container
+    .application-details
+    .row
+    .tunnels-select__multi-value__remove:hover {
+    background-color: var(--color-accent);
+    color: var(--color-text);
+}
+
+.application-details-container
+    .application-details
+    .row
+    .tunnels-select__indicator-separator {
+    background-color: var(--color-accent-60);
+}
+
+.application-details-container .application-details .row.control-panel button {
+    margin-right: 12px;
+}

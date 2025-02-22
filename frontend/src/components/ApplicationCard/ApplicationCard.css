@@ -1,0 +1,99 @@
+.application-card-container {
+    width: 732px;
+    padding: 12px;
+}
+
+.application-card-container .application-card {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    border-radius: 5px;
+    border: 1px solid var(--color-background-secondary);
+    background-color: var(--color-background-secondary);
+    box-shadow: 0 4px 6px var(--color-shadow);
+    cursor: default;
+    padding: 8px;
+    opacity: 0.9;
+}
+
+.application-card-container.loading {
+    cursor: default;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.application-card-container .application-card:hover {
+    border-color: var(--color-accent);
+}
+
+.application-card-container .application-card .tunnels {
+    border-top: 1px solid var(--color-accent-40);
+    padding: 8px 8px 2px 8px;
+}
+
+.application-card-container .application-card .header {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+}
+
+.application-card-container .application-card .header .control {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    justify-items: flex-end;
+}
+
+.application-card-container .application-card .header .control .edit {
+    font-size: 18px;
+    margin-top: 4px;
+    margin-left: 16px;
+    color: var(--color-accent-60);
+    cursor: pointer;
+}
+
+.application-card-container .application-card .header .control .edit:hover {
+    color: var(--color-accent);
+}
+
+.application-card-container .application-card .name {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--color-text);
+    margin-bottom: 14px;
+}
+
+.application-card-container .application-card .tunnel {
+    display: flex;
+    flex-direction: row;
+    padding-bottom: 4px;
+}
+
+.application-card-container .application-card .tunnel .name {
+    font-size: 14px;
+    font-weight: 200;
+    margin-bottom: 2px;
+    color: var(--color-text);
+    opacity: 0.8;
+}
+
+.application-card-container .application-card .tunnel div.name span {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.application-card-container .application-card .tunnel div.state {
+    margin: 5px 8px 0 0;
+    display: block;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    background-color: var(--color-background-80);
+}
+
+.application-card-container .application-card .tunnel div.state.connected {
+    background-color: #b7ff00;
+}

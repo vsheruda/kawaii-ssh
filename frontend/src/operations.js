@@ -47,7 +47,7 @@ function disconnect(tunnel) {
             }
 
             return {
-                hash: null,
+                hash: response.id,
                 status: ConnectionStatus.DISCONNECTED,
                 stdout: response.messages,
             };

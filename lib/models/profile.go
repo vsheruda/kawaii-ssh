@@ -30,10 +30,17 @@ type ViewSettings struct {
 	Compact bool `json:"compact"`
 }
 
+type Application struct {
+	ID        string   `json:"id"`
+	Name      string   `json:"name"`
+	TunnelIDs []string `json:"tunnel_ids"`
+}
+
 type Profile struct {
 	SSHConfigurations []SSHConfiguration `json:"ssh_configurations"`
 	Tunnels           []Tunnel           `json:"tunnels"`
 	ViewSettings      ViewSettings       `json:"view_settings"`
+	Applications      []Application      `json:"applications"`
 }
 
 func saveProfile(path string, profile *Profile) error {
