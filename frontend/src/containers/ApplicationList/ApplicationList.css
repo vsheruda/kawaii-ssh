@@ -5,7 +5,7 @@
 }
 
 .application-list-container .application-list {
-    padding: 24px 24px 24px 24px;
+    padding: 24px;
     display: flex;
     flex: 1;
     flex-flow: column wrap;

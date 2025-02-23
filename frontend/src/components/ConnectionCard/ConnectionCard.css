@@ -1,16 +1,13 @@
-.connection-list-container .connection-list .connection-card-container {
+.connection-card-container {
     padding: 12px;
 }
 
-.connection-list-container .connection-list .connection-card-container.loading {
+.connection-card-container.loading {
     pointer-events: none;
     opacity: 0.5;
 }
 
-.connection-list-container
-    .connection-list
-    .connection-card-container
-    .connection-card {
+.connection-card-container .connection-card {
     display: flex;
     width: 210px;
     height: 82px;
@@ -24,10 +21,7 @@
     opacity: 0.9;
 }
 
-.connection-list-container
-    .connection-list
-    .connection-card-container
-    .connection-card:hover {
+.connection-card-container .connection-card:hover {
     border-color: var(--color-accent);
 }
 

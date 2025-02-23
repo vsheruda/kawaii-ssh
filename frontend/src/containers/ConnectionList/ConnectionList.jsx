@@ -15,6 +15,7 @@ import { ConnectionStatus } from '../../const.js';
 import { HiOutlineCollection } from 'react-icons/hi';
 import { FaObjectUngroup, FaRegObjectGroup } from 'react-icons/fa';
 import { PiPlugsConnectedFill } from 'react-icons/pi';
+import SectionHeader from '../../components/SectionHeader/SectionHeader.jsx';
 
 function ConnectionGroup({ title, tunnels, setConnections }) {
     return (
@@ -32,6 +33,88 @@ function ConnectionGroup({ title, tunnels, setConnections }) {
                     />
                 ))}
             </div>
+        </div>
+    );
+}
+
+function ConnectionControl({
+    onViewSettingsChange,
+    isGroupedView,
+    isCompactView,
+    showConnectedOnly,
+    setShowConnectedOnly,
+    displayControl,
+}) {
+    return (
+        <div className={'connection-control'}>
+            <div className={`left ${displayControl ? '' : ' full-width'}`}>
+                <SectionHeader
+                    title={'Tunnels'}
+                    tipMessage={
+                        'Create a new tunnel to connect to a remote server.'
+                    }
+                    displayTip={!displayControl}
+                />
+            </div>
+            {displayControl ? (
+                <div className={'right'}>
+                    <div className={'section'}>
+                        <span
+                            className={
+                                !isGroupedView && !isCompactView ? 'active' : ''
+                            }
+                            title={'List view'}
+                            onClick={() => {
+                                onViewSettingsChange({
+                                    grouped: false,
+                                    compact: false,
+                                });
+                            }}
+                        >
+                            <HiOutlineCollection />
+                        </span>
+                        <span
+                            className={
+                                isGroupedView && !isCompactView ? 'active' : ''
+                            }
+                            title={'Group view'}
+                            onClick={() => {
+                                onViewSettingsChange({
+                                    grouped: true,
+                                    compact: false,
+                                });
+                            }}
+                        >
+                            <FaRegObjectGroup />
+                        </span>
+                        <span
+                            className={
+                                isGroupedView && isCompactView ? 'active' : ''
+                            }
+                            title={'Compact group view'}
+                            onClick={() => {
+                                onViewSettingsChange({
+                                    grouped: true,
+                                    compact: true,
+                                });
+                            }}
+                        >
+                            <FaObjectUngroup />
+                        </span>
+                    </div>
+                    <div className={'section'}>
+                        <span
+                            className={showConnectedOnly ? 'active' : ''}
+                            title={'Show connected only'}
+                            onClick={() => {
+                                setShowConnectedOnly(!showConnectedOnly);
+                            }}
+                        >
+                            <PiPlugsConnectedFill />
+                        </span>
+                    </div>
+                </div>
+            ) : null}
         </div>
     );
 }
@@ -96,63 +179,14 @@ function ConnectionList() {
 
     return (
         <div className={'connection-list-container'}>
-            <div className={'connection-list-control'}>
-                <div className={'section'}>
-                    <span
-                        className={
-                            !isGroupedView && !isCompactView ? 'active' : ''
-                        }
-                        title={'List view'}
-                        onClick={() => {
-                            onViewSettingsChange({
-                                grouped: false,
-                                compact: false,
-                            });
-                        }}
-                    >
-                        <HiOutlineCollection />
-                    </span>
-                    <span
-                        className={
-                            isGroupedView && !isCompactView ? 'active' : ''
-                        }
-                        title={'Group view'}
-                        onClick={() => {
-                            onViewSettingsChange({
-                                grouped: true,
-                                compact: false,
-                            });
-                        }}
-                    >
-                        <FaRegObjectGroup />
-                    </span>
-                    <span
-                        className={
-                            isGroupedView && isCompactView ? 'active' : ''
-                        }
-                        title={'Compact group view'}
-                        onClick={() => {
-                            onViewSettingsChange({
-                                grouped: true,
-                                compact: true,
-                            });
-                        }}
-                    >
-                        <FaObjectUngroup />
-                    </span>
-                </div>
-                <div className={'section'}>
-                    <span
-                        className={showConnectedOnly ? 'active' : ''}
-                        title={'Show connected only'}
-                        onClick={() => {
-                            setShowConnectedOnly(!showConnectedOnly);
-                        }}
-                    >
-                        <PiPlugsConnectedFill />
-                    </span>
-                </div>
-            </div>
+            <ConnectionControl
+                onViewSettingsChange={onViewSettingsChange}
+                setShowConnectedOnly={setShowConnectedOnly}
+                showConnectedOnly={showConnectedOnly}
+                isCompactView={isCompactView}
+                isGroupedView={isGroupedView}
+                displayControl={profile.tunnels.length > 0}
+            />
             <div
                 className={
                     'connection-list' +
@@ -160,7 +194,7 @@ function ConnectionList() {
                     (isCompactView ? ' compact' : '')
                 }
             >
-                <div className={'connection-list-items'}>
+                <div className={'items'}>
                     {!isLoading && getConnectionView()}
                 </div>
                 <AddCardPlaceholder onClick={onAddClick} />

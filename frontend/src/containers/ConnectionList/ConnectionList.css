@@ -4,13 +4,27 @@
     overflow: scroll;
 }
 
-.connection-list-container .connection-list-control {
+.connection-list-container .connection-control {
     display: flex;
-    flex-direction: row-reverse;
-    padding: 12px 36px 0 36px;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 24px 12px 0 24px;
 }
 
-.connection-list-container .connection-list-control .section {
+.connection-list-container .connection-control div.left {
+    display: flex;
+}
+
+.connection-list-container .connection-control div.left.full-width {
+    width: 100%;
+}
+
+.connection-list-container .connection-control div.right {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.connection-list-container .connection-control .section {
     display: flex;
     width: fit-content;
     border: 1px solid var(--color-background-secondary-60);
@@ -19,47 +33,45 @@
     margin-left: 12px;
 }
 
-.connection-list-container .connection-list-control .section span {
+.connection-list-container .connection-control .section span {
     display: flex;
     padding: 0 12px;
     color: var(--color-background-secondary-60);
     cursor: pointer;
 }
 
-.connection-list-container .connection-list-control .section span.active {
+.connection-list-container .connection-control .section span.active {
     color: var(--color-accent-60);
 }
 
-.connection-list-container .connection-list-control .section span:hover {
+.connection-list-container .connection-control .section span:hover {
     color: var(--color-accent-60);
 }
 
 .connection-list-container .connection-list {
-    padding: 12px 24px 24px 24px;
+    padding: 0 24px 24px 24px;
     display: flex;
     flex: 1;
     flex-flow: column wrap;
     justify-content: flex-start;
 }
 
-.connection-list-container .connection-list .connection-list-items {
+.connection-list-container .connection-list .items {
     display: flex;
     flex-flow: row wrap;
 }
 
-.connection-list-container .connection-list .connection-list-items {
+.connection-list-container .connection-list .items {
     display: flex;
 }
 
-.connection-list-container .connection-list.grouped .connection-list-items {
+.connection-list-container .connection-list.grouped .items {
     display: flex;
     flex-flow: column wrap;
     margin-bottom: 10px;
 }
 
-.connection-list-container
-    .connection-list.grouped.compact
-    .connection-list-items {
+.connection-list-container .connection-list.grouped.compact .items {
     flex-flow: row wrap;
 }
 
