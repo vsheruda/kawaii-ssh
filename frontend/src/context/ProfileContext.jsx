@@ -110,6 +110,7 @@ export const ProfileProvider = ({ children }) => {
         <ProfileContext.Provider
             value={{
                 version,
+                theme: profile?.view_settings?.theme || '',
                 setProfile,
                 // Assemble profile data for easier data access
                 profile: {

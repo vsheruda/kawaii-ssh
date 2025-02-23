@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './NavPanel.css';
 import { IoDesktopSharp } from 'react-icons/io5';
 import { MdElectricBolt } from 'react-icons/md';
@@ -7,26 +7,39 @@ import { IoIosSave } from 'react-icons/io';
 import { Link, useLocation } from 'react-router';
 import { useProfile } from '../../context/ProfileContext.jsx';
 import { VscPaintcan } from 'react-icons/vsc';
+import { handleThemeChange } from '../../utils.js';
 
 const THEMES = ['', 'light', 'vintage-modern', 'neon', 'pink'];
 
 function NavPanel() {
-    const { isSyncing, version } = useProfile();
+    const { isSyncing, setProfile, version, theme } = useProfile();
     const location = useLocation();
 
-    const [themeIndex, setThemeIndex] = useState(0);
+    const [appTheme, setAppTheme] = useState(null);
+
+    if (appTheme === null && theme) {
+        setAppTheme(theme);
+    }
+
+    const onThemeChange = handleThemeChange(setProfile);
 
     const isSelected = (paths) => paths.includes(location.pathname);
 
     const changeTheme = () => {
-        if (themeIndex >= THEMES.length - 1) {
-            setThemeIndex(0);
+        const nextThemeIdx = THEMES.indexOf(appTheme) + 1;
+
+        if (nextThemeIdx > THEMES.length - 1) {
+            setAppTheme(THEMES[0]);
         } else {
-            setThemeIndex(themeIndex + 1);
+            setAppTheme(THEMES[nextThemeIdx]);
         }
     };
 
-    document.documentElement.className = THEMES[themeIndex];
+    useEffect(() => {
+        onThemeChange(appTheme);
+    }, [appTheme]);
+
+    document.documentElement.className = appTheme;
 
     return (
         <div className={'nav-panel-container'}>

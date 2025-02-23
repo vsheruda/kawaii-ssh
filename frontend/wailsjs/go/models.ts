@@ -99,6 +99,7 @@ export namespace models {
 	export class ViewSettings {
 	    grouped: boolean;
 	    compact: boolean;
+	    theme: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new ViewSettings(source);
@@ -108,6 +109,7 @@ export namespace models {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.grouped = source["grouped"];
 	        this.compact = source["compact"];
+	        this.theme = source["theme"];
 	    }
 	}
 	export class Tunnel {

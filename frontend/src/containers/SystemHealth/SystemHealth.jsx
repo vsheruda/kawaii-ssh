@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getSystemHealth, terminateProcesses } from '../../operations.js';
 import './SystemHealth.css';
 import { useProfile } from '../../context/ProfileContext.jsx';
-import SectionHeader from "../../components/SectionHeader/SectionHeader.jsx";
+import SectionHeader from '../../components/SectionHeader/SectionHeader.jsx';
 
 function SystemHealth() {
     const [refresh, setRefresh] = useState(0);

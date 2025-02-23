@@ -26,8 +26,9 @@ type Tunnel struct {
 }
 
 type ViewSettings struct {
-	Grouped bool `json:"grouped"`
-	Compact bool `json:"compact"`
+	Grouped bool   `json:"grouped"`
+	Compact bool   `json:"compact"`
+	Theme   string `json:"theme"`
 }
 
 type Application struct {

@@ -23,6 +23,13 @@ const handleViewSettingsChange =
         }));
     };
 
+const handleThemeChange = (setProfile) => (theme) => {
+    setProfile((prevState) => ({
+        ...prevState,
+        view_settings: { ...prevState.view_settings, theme },
+    }));
+};
+
 const handleConnectionsStateChange =
     (connections, setConnections) => (openConnections) => {
         // Reset connection status
@@ -150,6 +157,7 @@ export {
     handleConnectionsStateChange,
     handleConnectionStateChange,
     handleViewSettingsChange,
+    handleThemeChange,
     handleApplicationConfigurationStateChange,
     isSameTunnel,
     isSameSSHConfig,
