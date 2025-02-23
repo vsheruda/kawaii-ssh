@@ -64,7 +64,7 @@ function ApplicationCard({ id, name, tunnels, setConnections }) {
         <div className={`application-card-container ${isLoading && 'loading'}`}>
             <div className={'application-card'}>
                 <div className={'header'}>
-                    <div className={'name'}>{getValueOrSubstr(name, 18)}</div>
+                    <div className={'name'}>{getValueOrSubstr(name, 50)}</div>
                     <div className={'control'}>
                         <Toggle
                             checked={isEnabled || isLoading}

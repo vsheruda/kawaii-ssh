@@ -22,6 +22,7 @@
 .connection-list-container .connection-control div.right {
     display: flex;
     flex-direction: row-reverse;
+    max-height: 38px;
 }
 
 .connection-list-container .connection-control .section {
