@@ -13,9 +13,10 @@
 
 .system-health-container .system-health .open-tunnels {
     overflow-y: scroll;
-    border: 1px solid var(--color-accent-60);
-    border-radius: 2px;
+    border: 1px solid var(--color-accent-40);
+    border-radius: 5px;
     padding: 12px;
+    margin-left: 12px;
 }
 
 .system-health-container .system-health .open-tunnels .control-panel {

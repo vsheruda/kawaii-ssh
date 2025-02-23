@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getSystemHealth, terminateProcesses } from '../../operations.js';
 import './SystemHealth.css';
 import { useProfile } from '../../context/ProfileContext.jsx';
+import SectionHeader from "../../components/SectionHeader/SectionHeader.jsx";
 
 function SystemHealth() {
     const [refresh, setRefresh] = useState(0);
@@ -26,7 +27,7 @@ function SystemHealth() {
     return (
         <div className={'system-health-container'}>
             <div className={'system-health'}>
-                <h2>Open Tunnels</h2>
+                <SectionHeader title={'Open Tunnels'} displayTip={false} />
                 <div className={'open-tunnels'}>
                     <div className={'control-panel'}>
                         <button onClick={() => setRefresh(refresh + 1)}>
