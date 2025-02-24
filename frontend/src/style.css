@@ -12,6 +12,20 @@
     --color-shadow: rgba(0, 0, 0, 0.17);
 }
 
+:root.charcoal-orange {
+    --color-background: #1a1a1a; /* Dark charcoal for main background */
+    --color-background-80: rgba(26, 26, 26, 0.8); /* Transparent charcoal */
+    --color-background-secondary: #4d4d4d; /* Lighter charcoal for secondary backgrounds */
+    --color-background-secondary-80: rgba(77, 77, 77, 0.8); /* Transparent secondary */
+    --color-background-secondary-60: rgba(77, 77, 77, 0.6); /* Slightly lighter secondary */
+    --color-text: #ffffff; /* Bright white for sharp, clean text contrast */
+    --color-text-secondary: #ffe8d1; /* Subtle warm orange-cream for secondary text */
+    --color-accent: #ff8800; /* Bright, bold orange for vibrant accents */
+    --color-accent-60: rgba(255, 136, 0, 0.6); /* Bright orange at 60% opacity for overlays */
+    --color-accent-40: rgba(255, 136, 0, 0.4); /* Bright orange at 40% opacity */
+    --color-shadow: rgba(0, 0, 0, 0.3); /* Dark shadow for a stronger effect */
+}
+
 :root.light {
     --color-background: #fafafa;
     --color-background-80: rgba(250, 250, 250, 0.8);
@@ -66,6 +80,20 @@
     --color-accent-60: rgba(248, 162, 196, 0.6);
     --color-accent-40: rgba(248, 162, 196, 0.4);
     --color-shadow: rgba(150, 111, 85, 0.2);
+}
+
+:root.orange {
+    --color-background: #262626;
+    --color-background-80: rgba(38, 38, 38, 0.8);
+    --color-background-secondary: #4b3b31;
+    --color-background-secondary-80: rgba(75, 59, 49, 0.8);
+    --color-background-secondary-60: rgba(75, 59, 49, 0.6);
+    --color-text: #ffedd5;
+    --color-text-secondary: #ffcc99;
+    --color-accent: #ff9800;
+    --color-accent-60: rgba(255, 152, 0, 0.6);
+    --color-accent-40: rgba(255, 152, 0, 0.4);
+    --color-shadow: rgba(0, 0, 0, 0.2);
 }
 
 html {

@@ -77,6 +77,13 @@
     margin-bottom: 2px;
     color: var(--color-text);
     opacity: 0.8;
+    line-height: 1.4em;
+}
+
+.application-card-container .application-card .tunnel div.name span span.local-port {
+    font-size: 14px;
+    font-weight: 200;
+    color: var(--color-text-secondary);
 }
 
 .application-card-container .application-card .tunnel div.name span {

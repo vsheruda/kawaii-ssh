@@ -16,9 +16,8 @@ const ApplicationTunnel = ({ tunnel }) => {
             <div className={`state ${isEnabled && 'connected'}`} />
             <div className={'name'}>
                 <span>
-                    {PORT_NAME_LOOKUP_MAP[tunnel.remote_port] ||
-                        tunnel.local_port}
-                    :
+                    {PORT_NAME_LOOKUP_MAP[tunnel.remote_port] || tunnel.local_port}
+                    <span className={"local-port"}> : {tunnel.local_port}</span> -
                 </span>{' '}
                 {tunnel.remote_destination}
             </div>

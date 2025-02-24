@@ -9,7 +9,7 @@ import { useProfile } from '../../context/ProfileContext.jsx';
 import { VscPaintcan } from 'react-icons/vsc';
 import { handleThemeChange } from '../../utils.js';
 
-const THEMES = ['', 'light', 'vintage-modern', 'neon', 'pink'];
+const THEMES = ['', 'orange', 'neon', 'charcoal-orange', 'light', 'vintage-modern', 'pink'];
 
 function NavPanel() {
     const { isSyncing, setProfile, version, theme } = useProfile();
