@@ -16,6 +16,11 @@ type ConnectResponse struct {
 	ResponseCode    int16    `json:"responseCode"`
 }
 
+type TestHostResponse struct {
+	ResponseMessage string `json:"responseMessage"`
+	ResponseCode    int16  `json:"responseCode"`
+}
+
 type ProfileResponse struct {
 	ResponseCode int16   `json:"responseCode" required:"true"`
 	Profile      Profile `json:"profile"`

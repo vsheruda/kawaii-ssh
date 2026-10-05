@@ -253,6 +253,20 @@ export namespace models {
 		    return a;
 		}
 	}
+	export class TestHostResponse {
+	    responseMessage: string;
+	    responseCode: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new TestHostResponse(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.responseMessage = source["responseMessage"];
+	        this.responseCode = source["responseCode"];
+	    }
+	}
 	
 
 }

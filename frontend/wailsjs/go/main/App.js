@@ -29,3 +29,7 @@ export function SaveProfile(arg1) {
 export function TerminateProcesses(arg1) {
   return window['go']['main']['App']['TerminateProcesses'](arg1);
 }
+
+export function TestHost(arg1) {
+  return window['go']['main']['App']['TestHost'](arg1);
+}

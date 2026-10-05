@@ -4,6 +4,7 @@ import (
 	"KawaiiSSH/lib/utils"
 	"embed"
 	"fmt"
+
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/logger"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -17,7 +18,7 @@ var assets embed.FS
 //go:embed build/appicon.png
 var icon []byte
 
-var Version = "0.8.1"
+var Version = "0.9.0"
 
 func main() {
 	// Create an instance of the app structure

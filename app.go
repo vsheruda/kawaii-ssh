@@ -4,6 +4,7 @@ import (
 	"KawaiiSSH/lib/models"
 	"KawaiiSSH/lib/utils"
 	"context"
+	"fmt"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"regexp"
 	"sync"
@@ -36,11 +37,7 @@ func ConnectionLoop(a *App) {
 		a.sshPipesMutex.Lock()
 
 		for k, sshPipe := range a.sshPipes {
-			if !sshPipe.IsConnected {
-				continue
-			}
-
-			sshPipe.IsConnected = utils.IsConnectionOpen(a.ctx, sshPipe.LocalPort)
+			sshPipe.IsConnected = sshPipe.PipeResult.IsRunning()
 
 			if !sshPipe.IsConnected {
 				utils.SshReconnect(a.ctx, a.sshPipes[k])
@@ -59,7 +56,7 @@ func (a *App) Disconnect(hash string) models.ConnectResponse {
 	a.sshPipesMutex.Lock()
 	defer a.sshPipesMutex.Unlock()
 
-	if _, ok := a.sshPipes[hash]; !ok || !a.sshPipes[hash].IsConnected {
+	if _, ok := a.sshPipes[hash]; !ok {
 		return models.ConnectResponse{
 			ID:              hash,
 			Messages:        []string{},
@@ -70,9 +67,9 @@ func (a *App) Disconnect(hash string) models.ConnectResponse {
 
 	sshPipe := a.sshPipes[hash]
 
-	sshPipe.PipeResult.Stop()
-
-	delete(a.sshPipes, hash)
+	if sshPipe.PipeResult.Stop() {
+		delete(a.sshPipes, hash)
+	}
 
 	runtime.LogInfof(
 		a.ctx,
@@ -83,7 +80,7 @@ func (a *App) Disconnect(hash string) models.ConnectResponse {
 
 	return models.ConnectResponse{
 		ID:              sshPipe.PipeResult.Hash(),
-		Messages:        sshPipe.PipeResult.Messages,
+		Messages:        sshPipe.PipeResult.GetMessages(),
 		ResponseMessage: sshPipe.PipeResult.ResponseMessage(),
 		ResponseCode:    sshPipe.PipeResult.ResponseCode(),
 	}
@@ -105,10 +102,11 @@ func (a *App) Connect(payload models.ConnectPayload) models.ConnectResponse {
 
 	hash := sshPipe.PipeResult.Hash()
 
-	if _, ok := a.sshPipes[hash]; !ok || !a.sshPipes[hash].IsConnected {
+	if _, ok := a.sshPipes[hash]; !ok {
 		a.sshPipes[hash] = sshPipe
 
 		sshPipe.PipeResult.Run()
+		sshPipe.IsConnected = sshPipe.PipeResult.IsRunning()
 
 		time.Sleep(2 * time.Second)
 	} else {
@@ -118,15 +116,28 @@ func (a *App) Connect(payload models.ConnectPayload) models.ConnectResponse {
 	runtime.LogInfof(
 		a.ctx,
 		"Returning connection response info=%s response_message=%s",
-		sshPipe.PipeResult.Messages,
+		sshPipe.PipeResult.GetMessages(),
 		sshPipe.PipeResult.ResponseMessage(),
 	)
 
 	return models.ConnectResponse{
 		ID:              hash,
-		Messages:        sshPipe.PipeResult.Messages,
+		Messages:        sshPipe.PipeResult.GetMessages(),
 		ResponseMessage: sshPipe.PipeResult.ResponseMessage(),
 		ResponseCode:    sshPipe.PipeResult.ResponseCode(),
+	}
+}
+
+func (a *App) TestHost(configuration models.SSHConfiguration) models.TestHostResponse {
+	if err := utils.TestSSHConnection(a.ctx, configuration.Username, configuration.Host, configuration.KeyPath); err != nil {
+		return models.TestHostResponse{
+			ResponseCode:    500,
+			ResponseMessage: fmt.Sprintf("The SSH connection failed.\n\n%s", err),
+		}
+	}
+	return models.TestHostResponse{
+		ResponseCode:    200,
+		ResponseMessage: fmt.Sprintf("SSH connection to %s@%s succeeded.", configuration.Username, configuration.Host),
 	}
 }
 
@@ -189,6 +200,9 @@ func (a *App) GetSystemHealth() models.SystemHealthResponse {
 }
 
 func (a *App) TerminateProcesses(pids []string) {
+	a.sshPipesMutex.Lock()
+	defer a.sshPipesMutex.Unlock()
+
 	for _, pid := range pids {
 		_, err := utils.CmdExecute(a.ctx, "kill -9 "+pid)
 
@@ -199,8 +213,10 @@ func (a *App) TerminateProcesses(pids []string) {
 
 	// This won't work once termination by PID is implemented.
 	// Need to find a better way to know which hash to remove.
-	for k, _ := range a.sshPipes {
-		delete(a.sshPipes, k)
+	for k, sshPipe := range a.sshPipes {
+		if sshPipe.PipeResult.Stop() {
+			delete(a.sshPipes, k)
+		}
 	}
 }
 
@@ -223,7 +239,7 @@ func (a *App) GetConnections() []models.ConnectionStateResponse {
 	for k, sshPipe := range a.sshPipes {
 		connections = append(connections, models.ConnectionStateResponse{
 			ID:          k,
-			Messages:    sshPipe.PipeResult.Messages,
+			Messages:    sshPipe.PipeResult.GetMessages(),
 			IsConnected: sshPipe.IsConnected,
 		})
 	}

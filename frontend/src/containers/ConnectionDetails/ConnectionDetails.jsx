@@ -10,6 +10,7 @@ import {
     isSameTunnel,
 } from '../../utils.js';
 import { connect, disconnect } from '../../operations.js';
+import DeleteButton from '../../components/DeleteButton/DeleteButton.jsx';
 
 function ConnectionDetails() {
     const location = useLocation();
@@ -209,16 +210,15 @@ function ConnectionDetails() {
                         >
                             Save
                         </button>
-                        <button
+                        <DeleteButton
+                            itemType="connection"
+                            itemName={`${tunnel.local_port} → ${tunnel.remote_destination}:${tunnel.remote_port}`}
                             disabled={
                                 tunnel.connection?.status ===
                                     ConnectionStatus.CONNECTED || isLoading
                             }
-                            onClick={onDeleteClick}
-                            className="btn"
-                        >
-                            Delete
-                        </button>
+                            onConfirm={onDeleteClick}
+                        />
                         {getActionButton()}
                         <div
                             className={`status-circle ${tunnel.connection?.status}`}
