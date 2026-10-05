@@ -37,9 +37,7 @@ func ConnectionLoop(a *App) {
 		a.sshPipesMutex.Lock()
 
 		for k, sshPipe := range a.sshPipes {
-			sshPipe.IsConnected = sshPipe.PipeResult.IsRunning()
-
-			if !sshPipe.IsConnected {
+			if !sshPipe.PipeResult.IsRunning() {
 				utils.SshReconnect(a.ctx, a.sshPipes[k])
 			}
 		}
@@ -96,7 +94,17 @@ func (a *App) Connect(payload models.ConnectPayload) models.ConnectResponse {
 		payload.RemotePort,
 		payload.KeyPath,
 	)
+	response := a.connect(sshPipe)
+	runtime.LogInfof(
+		a.ctx,
+		"Returning connection response info=%s response_message=%s",
+		response.Messages,
+		response.ResponseMessage,
+	)
+	return response
+}
 
+func (a *App) connect(sshPipe *utils.SSHPipeResult) models.ConnectResponse {
 	a.sshPipesMutex.Lock()
 	defer a.sshPipesMutex.Unlock()
 
@@ -106,19 +114,14 @@ func (a *App) Connect(payload models.ConnectPayload) models.ConnectResponse {
 		a.sshPipes[hash] = sshPipe
 
 		sshPipe.PipeResult.Run()
-		sshPipe.IsConnected = sshPipe.PipeResult.IsRunning()
-
-		time.Sleep(2 * time.Second)
+		if err := sshPipe.WaitForConnection(a.ctx); err != nil {
+			sshPipe.PipeResult.Stop()
+			sshPipe.PipeResult.Fail(err, err.Error())
+			delete(a.sshPipes, hash)
+		}
 	} else {
 		sshPipe = a.sshPipes[hash]
 	}
-
-	runtime.LogInfof(
-		a.ctx,
-		"Returning connection response info=%s response_message=%s",
-		sshPipe.PipeResult.GetMessages(),
-		sshPipe.PipeResult.ResponseMessage(),
-	)
 
 	return models.ConnectResponse{
 		ID:              hash,
@@ -240,7 +243,7 @@ func (a *App) GetConnections() []models.ConnectionStateResponse {
 		connections = append(connections, models.ConnectionStateResponse{
 			ID:          k,
 			Messages:    sshPipe.PipeResult.GetMessages(),
-			IsConnected: sshPipe.IsConnected,
+			IsConnected: sshPipe.IsConnected(),
 		})
 	}
 

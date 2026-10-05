@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"os"
@@ -61,7 +62,7 @@ func TestReconnectReleasesPreviousListener(t *testing.T) {
 		if previous.IsRunning() || previous.cmd.ProcessState == nil {
 			t.Fatal("reconnect did not stop and wait for the previous process")
 		}
-		if !tunnel.IsConnected {
+		if !tunnel.PipeResult.IsRunning() {
 			t.Fatal("replacement process did not start")
 		}
 		waitForListener(t, tunnel.PipeResult)
@@ -71,6 +72,54 @@ func TestReconnectReleasesPreviousListener(t *testing.T) {
 	}
 	if tunnel.PipeResult.ResponseCode() != 200 {
 		t.Fatal("an intentional stop must not report a command failure")
+	}
+}
+
+func TestTunnelReadinessResetsOnReconnect(t *testing.T) {
+	pipe := Pipe(*exec.Command("/bin/sleep", "30"))
+	tunnel := &SSHPipeResult{PipeResult: pipe}
+	t.Cleanup(func() { tunnel.PipeResult.Stop() })
+	pipe.Run()
+	if tunnel.IsConnected() {
+		t.Fatal("process startup was reported as a ready tunnel")
+	}
+	pipe.AppendMessage("debug1: Local forwarding listening on 127.0.0.1 port 1234.")
+	pipe.AppendMessage("bind [127.0.0.1]:1234: Address already in use")
+	if tunnel.IsConnected() {
+		t.Fatal("a listener attempt was reported as a ready tunnel")
+	}
+	pipe.AppendMessage("debug1: Entering interactive session.")
+	if err := tunnel.WaitForConnection(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < PipeMessageHistorySize; i++ {
+		pipe.AppendMessage("later output")
+	}
+	if !tunnel.IsConnected() {
+		t.Fatal("trimming old messages lost readiness")
+	}
+	tunnel.reconnect()
+	if tunnel.IsConnected() {
+		t.Fatal("the replacement inherited the previous tunnel's readiness")
+	}
+	tunnel.PipeResult.AppendMessage("debug1: Entering interactive session.")
+	tunnel.PipeResult.cmd.Process.Kill()
+	waitForPipe(t, tunnel.PipeResult)
+	if tunnel.IsConnected() {
+		t.Fatal("an exited process was reported as connected")
+	}
+}
+
+func TestFailedReconnectsStayDisconnected(t *testing.T) {
+	tunnel := &SSHPipeResult{PipeResult: Pipe(*exec.Command("/bin/sh", "-c", "exit 1"))}
+	t.Cleanup(func() { tunnel.PipeResult.Stop() })
+	tunnel.PipeResult.Run()
+	for i := 0; i < 3; i++ {
+		waitForPipe(t, tunnel.PipeResult)
+		tunnel.reconnect()
+		if tunnel.IsConnected() {
+			t.Fatal("a failed replacement was reported as connected")
+		}
 	}
 }
 

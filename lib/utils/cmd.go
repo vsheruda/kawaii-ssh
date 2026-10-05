@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"strings"
 	"sync"
+	"time"
 )
 
 var ConnectionTimeout = 60 * 30
@@ -27,13 +28,13 @@ type PipeResult struct {
 
 	mutex    sync.Mutex
 	done     chan struct{}
+	ready    chan struct{}
 	stopping bool
 }
 
 type SSHPipeResult struct {
-	PipeResult  *PipeResult
-	LocalPort   string
-	IsConnected bool
+	PipeResult *PipeResult
+	LocalPort  string
 }
 
 func (p *PipeResult) AppendMessage(line string) {
@@ -41,6 +42,14 @@ func (p *PipeResult) AppendMessage(line string) {
 	defer p.mutex.Unlock()
 
 	p.Messages = append(p.Messages, line)
+	// OpenSSH reaches its session loop after authentication and local forwarding setup.
+	if line == "debug1: Entering interactive session." {
+		select {
+		case <-p.ready:
+		default:
+			close(p.ready)
+		}
+	}
 	if len(p.Messages) > PipeMessageHistorySize {
 		p.Messages = p.Messages[len(p.Messages)-PipeMessageHistorySize:]
 	}
@@ -84,22 +93,29 @@ func (p *PipeResult) ResponseMessage() string {
 }
 
 func (p *PipeResult) Run() {
-	stdout, err := p.cmd.StdoutPipe()
+	stdout, stdoutWriter, err := os.Pipe()
 	if err != nil {
 		p.Fail(err, "failed to get stdout Pipe")
 		close(p.done)
 		return
 	}
 
-	stderr, err := p.cmd.StderrPipe()
+	stderr, stderrWriter, err := os.Pipe()
 	if err != nil {
 		stdout.Close()
+		stdoutWriter.Close()
 		p.Fail(err, "failed to get stderr Pipe")
 		close(p.done)
 		return
 	}
 
-	if err := p.cmd.Start(); err != nil {
+	// These pipes stay open until readers drain, independently of cmd.Wait.
+	p.cmd.Stdout = stdoutWriter
+	p.cmd.Stderr = stderrWriter
+	err = p.cmd.Start()
+	stdoutWriter.Close()
+	stderrWriter.Close()
+	if err != nil {
 		stdout.Close()
 		stderr.Close()
 		p.Fail(err, "failed to start command")
@@ -117,16 +133,31 @@ func (p *PipeResult) Run() {
 		for scanner.Scan() {
 			p.AppendMessage(scanner.Text())
 		}
-		if err := scanner.Err(); err != nil {
+		if err := scanner.Err(); err != nil && !errors.Is(err, os.ErrClosed) {
 			p.Fail(err, reason)
 		}
 	}
 	go readMessages(stdout, "failed to read stdout")
 	go readMessages(stderr, "failed to read stderr")
 
+	readersDone := make(chan struct{})
 	go func() {
 		readers.Wait()
+		close(readersDone)
+	}()
+	go func() {
 		err := p.cmd.Wait()
+		// A proxy may outlive SSH and retain an output pipe.
+		if cleanupErr := stopProcessGroup(p.cmd); cleanupErr != nil {
+			p.Fail(cleanupErr, "failed to stop proxy processes")
+		}
+		select {
+		case <-readersDone:
+		case <-time.After(time.Second):
+			stdout.Close()
+			stderr.Close()
+			<-readersDone
+		}
 		p.mutex.Lock()
 		if err != nil && !p.stopping {
 			p.PipeError = err
@@ -138,12 +169,12 @@ func (p *PipeResult) Run() {
 }
 
 func (p *PipeResult) Stop() bool {
-	if p.cmd.Process != nil {
+	if p.IsRunning() {
 		p.mutex.Lock()
 		p.stopping = true
 		p.mutex.Unlock()
 
-		if err := p.cmd.Process.Kill(); err != nil && !errors.Is(err, os.ErrProcessDone) {
+		if err := stopProcessGroup(p.cmd); err != nil {
 			p.Fail(err, "failed to kill process")
 			return false
 		}
@@ -169,10 +200,12 @@ func (p *PipeResult) Hash() string {
 }
 
 func Pipe(cmd exec.Cmd) *PipeResult {
+	prepareProcessGroup(&cmd)
 	return &PipeResult{
 		cmd:      &cmd,
 		Messages: make([]string, 0),
 		done:     make(chan struct{}),
+		ready:    make(chan struct{}),
 	}
 }
 
@@ -187,7 +220,8 @@ func Ssh(
 ) *SSHPipeResult {
 	cmdStr := fmt.Sprintf(
 		"%s %s@%s -L %s:%s:%s -i %s -v -o IdentitiesOnly=yes -o StrictHostKeyChecking=no "+
-			"-o ExitOnForwardFailure=yes -o ConnectTimeout=10 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 sleep %d",
+			"-o ExitOnForwardFailure=yes -o ConnectTimeout=10 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 "+
+			"-o ControlMaster=no -o ControlPath=none -o ForkAfterAuthentication=no sleep %d",
 		SSHExecutable,
 		username,
 		host,
@@ -205,7 +239,31 @@ func Ssh(
 
 	pipeResult := Pipe(*cmd)
 
-	return &SSHPipeResult{PipeResult: pipeResult, LocalPort: localPort, IsConnected: true}
+	return &SSHPipeResult{PipeResult: pipeResult, LocalPort: localPort}
+}
+
+func (sshPipe *SSHPipeResult) IsConnected() bool {
+	select {
+	case <-sshPipe.PipeResult.ready:
+		return sshPipe.PipeResult.IsRunning()
+	default:
+		return false
+	}
+}
+
+func (sshPipe *SSHPipeResult) WaitForConnection(ctx context.Context) error {
+	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
+	defer cancel()
+	select {
+	case <-sshPipe.PipeResult.ready:
+		if sshPipe.IsConnected() {
+			return nil
+		}
+	case <-sshPipe.PipeResult.done:
+	case <-ctx.Done():
+		return fmt.Errorf("SSH tunnel did not become ready: %w", ctx.Err())
+	}
+	return errors.New("SSH exited before the tunnel became ready")
 }
 
 func SshReconnect(ctx context.Context, sshPipe *SSHPipeResult) *SSHPipeResult {
@@ -228,7 +286,6 @@ func (sshPipe *SSHPipeResult) reconnect() *SSHPipeResult {
 	reconnectedPipe.Run()
 
 	sshPipe.PipeResult = reconnectedPipe
-	sshPipe.IsConnected = reconnectedPipe.IsRunning()
 
 	return sshPipe
 }
