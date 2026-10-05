@@ -4,7 +4,7 @@ A subjectively nice GUI for ssh cmd. Created to easily manage multiple SSH tunne
 
 ## Demo
 
-![Demo 0.3.0](etc/demo-0.3.0.gif)
+![Demo 0.9.0](etc/demo-0.9.0.gif)
 
 
 ## Live Development
