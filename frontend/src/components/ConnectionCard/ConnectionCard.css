@@ -38,6 +38,12 @@
     color: var(--color-text);
 }
 
+.connection-card [role='status'] {
+    align-self: center;
+    font-size: 11px;
+    color: var(--color-accent);
+}
+
 .connection-card .destination {
     margin-top: 4px;
     font-size: 12px;

@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from 'react-router';
 import Select from 'react-select';
 import { groupBy, pipe, map, entries } from 'lodash/fp';
 import { handleApplicationConfigurationStateChange } from '../../utils.js';
+import DeleteButton from '../../components/DeleteButton/DeleteButton.jsx';
 
 function getTunnelLabel(tunnel) {
     return `${tunnel.remote_destination}:${tunnel.remote_port}`;
@@ -128,9 +129,11 @@ function ApplicationDetails() {
                     >
                         Save
                     </button>
-                    <button onClick={onDeleteClick} className="btn">
-                        Delete
-                    </button>
+                    <DeleteButton
+                        itemType="application"
+                        itemName={application.name}
+                        onConfirm={onDeleteClick}
+                    />
                 </div>
             </div>
         </div>

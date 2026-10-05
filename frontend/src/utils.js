@@ -1,5 +1,4 @@
 import { ConnectionStatus } from './const.js';
-import app from './App.jsx';
 
 const isSameTunnel = (t1) => (t2) => {
     return t1.id === t2.id;
@@ -32,32 +31,26 @@ const handleThemeChange = (setProfile) => (theme) => {
 
 const handleConnectionsStateChange =
     (connections, setConnections) => (openConnections) => {
-        // Reset connection status
-        for (const key in connections) {
-            connections[key].status = ConnectionStatus.DISCONNECTED;
-        }
-
-        // Set newly fetched connection status
-        for (const connection of openConnections) {
-            const tunnel = Object.values(connections).find(
-                (it) => it.hash === connection.id
-            );
-
-            if (!tunnel) {
-                continue;
+        setConnections((prevState) => {
+            const nextState = { ...prevState };
+            for (const [id, previous] of Object.entries(connections)) {
+                // A late poll must not overwrite a newer connect or disconnect.
+                if (prevState[id] !== previous) continue;
+                const current = openConnections.find(
+                    (connection) => connection.id === previous.hash
+                );
+                nextState[id] = {
+                    ...previous,
+                    status: current
+                        ? current.is_connected
+                            ? ConnectionStatus.CONNECTED
+                            : ConnectionStatus.RECONNECTING
+                        : ConnectionStatus.DISCONNECTED,
+                    stdout: current?.messages ?? previous.stdout,
+                };
             }
-
-            console.log('Updating connection: ', tunnel, ' with:', connection);
-
-            tunnel.status = connection.is_connected
-                ? ConnectionStatus.CONNECTED
-                : ConnectionStatus.DISCONNECTED;
-            tunnel.stdout = connection.messages;
-        }
-
-        console.log('New connection state: ', connections);
-
-        setConnections((prevState) => ({ ...prevState, ...connections }));
+            return nextState;
+        });
     };
 
 const handleConnectionStateChange = (tunnel, setConnections) => (newState) => {

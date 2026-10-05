@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import './HostSettingsDetails.css';
 import { useLocation, useNavigate } from 'react-router';
 import { useProfile } from '../../context/ProfileContext.jsx';
+import DeleteButton from '../../components/DeleteButton/DeleteButton.jsx';
+import Dialog from '../../components/Dialog/Dialog.jsx';
+import { TestHost } from '../../../wailsjs/go/main/App.js';
 import {
     handleSSHConfigurationStateChange,
     isSameSSHConfig,
@@ -29,6 +32,8 @@ function HostSettingsDetails() {
 
     const [hasChanged, setHasChanged] = useState(false);
     const [infoMessage, setInfoMessage] = useState(null);
+    const [isTesting, setIsTesting] = useState(false);
+    const [testResult, setTestResult] = useState(null);
     const [name, setName] = useState(sshConfiguration.name);
     const [remoteHost, setRemoveHost] = useState(sshConfiguration.host);
     const [remoteUsername, setRemoteUsername] = useState(
@@ -51,6 +56,27 @@ function HostSettingsDetails() {
         // Immediate navigation fixes invalid lookup of the ssh config from profile
         // by outdated location.state.sshConfiguration
         navigate('/host-settings');
+    };
+
+    const onTestClick = async () => {
+        setIsTesting(true);
+        setTestResult(null);
+        try {
+            const result = await TestHost({
+                name,
+                host: remoteHost,
+                username: remoteUsername,
+                key_path: keyPath,
+            });
+            setTestResult(result);
+        } catch (error) {
+            setTestResult({
+                responseCode: 500,
+                responseMessage: error?.message || String(error),
+            });
+        } finally {
+            setIsTesting(false);
+        }
     };
 
     const onDeleteClick = () => {
@@ -151,17 +177,32 @@ function HostSettingsDetails() {
                     >
                         Save
                     </button>
-                    <button className="btn">Test</button>
                     <button
-                        disabled={hasChanged}
                         className="btn"
-                        onClick={onDeleteClick}
+                        disabled={isTesting}
+                        onClick={onTestClick}
                     >
-                        Delete
+                        {isTesting ? 'Testing...' : 'Test'}
                     </button>
+                    <DeleteButton
+                        itemType="host configuration"
+                        itemName={sshConfiguration.name}
+                        disabled={hasChanged}
+                        onConfirm={onDeleteClick}
+                    />
                     <span className={'info-message'}>{infoMessage}</span>
                 </div>
             </div>
+            <Dialog
+                open={testResult !== null}
+                title={
+                    testResult?.responseCode === 200
+                        ? 'Connection successful'
+                        : 'Connection failed'
+                }
+                message={testResult?.responseMessage}
+                onClose={() => setTestResult(null)}
+            />
         </div>
     );
 }

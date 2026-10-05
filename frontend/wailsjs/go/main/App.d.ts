@@ -15,3 +15,5 @@ export function GetSystemHealth():Promise<models.SystemHealthResponse>;
 export function SaveProfile(arg1:models.Profile):Promise<void>;
 
 export function TerminateProcesses(arg1:Array<string>):Promise<void>;
+
+export function TestHost(arg1:models.SSHConfiguration):Promise<models.TestHostResponse>;

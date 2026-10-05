@@ -11,7 +11,6 @@ import {
     GetConnections,
 } from '../../wailsjs/go/main/App.js';
 import { handleConnectionsStateChange } from '../utils.js';
-import { ConnectionStatus } from '../const.js';
 
 const ProfileContext = createContext({});
 
@@ -80,16 +79,6 @@ export const ProfileProvider = ({ children }) => {
     }, [forceProfileReload]);
 
     useEffect(() => {
-        const hasOpenConnections =
-            Object.values(connections).filter(
-                (it) => it.status === ConnectionStatus.CONNECTED
-            ).length === 0;
-
-        if (hasOpenConnections) {
-            scheduleUpdateConnectionsStates();
-            return;
-        }
-
         GetConnections().then((response) => {
             console.log('Fetched connection states', response, profile.tunnels);
             onConnectionsStateChange(response);

@@ -26,7 +26,9 @@ function connect(tunnel) {
 
             return {
                 hash: response.id,
-                status: ConnectionStatus.CONNECTED,
+                status: response.is_connected
+                    ? ConnectionStatus.CONNECTED
+                    : ConnectionStatus.RECONNECTING,
                 stdout: response.messages,
             };
         })
@@ -39,6 +41,13 @@ function connect(tunnel) {
 
 function disconnect(tunnel) {
     console.log('Disconnecting from ', tunnel.remote_destination);
+
+    if (!tunnel.connection?.hash) {
+        return Promise.resolve({
+            status: ConnectionStatus.DISCONNECTED,
+            stdout: [],
+        });
+    }
 
     return Disconnect(tunnel.connection.hash)
         .then((response) => {
@@ -76,17 +85,7 @@ function getSystemHealth() {
 }
 
 function terminateProcesses(pids) {
-    return TerminateProcesses(pids)
-        .then((response) => {
-            if (response.responseCode >= 400) {
-                return Promise.reject(response);
-            }
-        })
-        .catch((response) => {
-            console.error(response);
-
-            return Promise.reject(response);
-        });
+    return TerminateProcesses(pids);
 }
 
 export { connect, disconnect, getSystemHealth, terminateProcesses };
