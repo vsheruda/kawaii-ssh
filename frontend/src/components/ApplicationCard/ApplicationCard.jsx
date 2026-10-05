@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import './ApplicationCard.css';
 import 'react-toggle/style.css';
-import { ConnectionStatus, PORT_NAME_LOOKUP_MAP } from '../../const.js';
+import {
+    ConnectionStatus,
+    isConnectionActive,
+    PORT_NAME_LOOKUP_MAP,
+} from '../../const.js';
 import { useNavigate } from 'react-router';
 import { getValueOrSubstr, handleConnectionStateChange } from '../../utils.js';
 import Toggle from 'react-toggle';
@@ -9,17 +13,21 @@ import { IoSettingsSharp } from 'react-icons/io5';
 import { connect, disconnect } from '../../operations.js';
 
 const ApplicationTunnel = ({ tunnel }) => {
-    const isEnabled = tunnel.connection?.status === ConnectionStatus.CONNECTED;
-
     return (
         <div className={'tunnel'}>
-            <div className={`state ${isEnabled && 'connected'}`} />
+            <div className={`state ${tunnel.connection?.status}`} />
             <div className={'name'}>
                 <span>
-                    {PORT_NAME_LOOKUP_MAP[tunnel.remote_port] || tunnel.local_port}
-                    <span className={"local-port"}> : {tunnel.local_port}</span> -
+                    {PORT_NAME_LOOKUP_MAP[tunnel.remote_port] ||
+                        tunnel.local_port}
+                    <span className={'local-port'}> : {tunnel.local_port}</span>{' '}
+                    -
                 </span>{' '}
                 {tunnel.remote_destination}
+                {tunnel.connection?.status ===
+                    ConnectionStatus.RECONNECTING && (
+                    <span role="status"> (reconnecting)</span>
+                )}
             </div>
         </div>
     );
@@ -54,10 +62,7 @@ function ApplicationCard({ id, name, tunnels, setConnections }) {
     };
 
     const isEnabled =
-        isLoading ||
-        tunnels.every(
-            (it) => it.connection?.status === ConnectionStatus.CONNECTED
-        );
+        isLoading || tunnels.some((it) => isConnectionActive(it.connection));
 
     return (
         <div className={`application-card-container ${isLoading && 'loading'}`}>

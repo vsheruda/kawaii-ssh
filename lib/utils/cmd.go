@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"io"
 	"os"
@@ -26,10 +27,11 @@ type PipeResult struct {
 	PipeError       error
 	PipeErrorReason string
 
-	mutex    sync.Mutex
-	done     chan struct{}
-	ready    chan struct{}
-	stopping bool
+	mutex        sync.Mutex
+	done         chan struct{}
+	ready        chan struct{}
+	readyMessage string
+	stopping     bool
 }
 
 type SSHPipeResult struct {
@@ -41,15 +43,16 @@ func (p *PipeResult) AppendMessage(line string) {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
-	p.Messages = append(p.Messages, line)
-	// OpenSSH reaches its session loop after authentication and local forwarding setup.
-	if line == "debug1: Entering interactive session." {
+	// Only the target's command can acknowledge this connection attempt.
+	if line == p.readyMessage {
 		select {
 		case <-p.ready:
 		default:
 			close(p.ready)
 		}
+		return
 	}
+	p.Messages = append(p.Messages, line)
 	if len(p.Messages) > PipeMessageHistorySize {
 		p.Messages = p.Messages[len(p.Messages)-PipeMessageHistorySize:]
 	}
@@ -201,11 +204,14 @@ func (p *PipeResult) Hash() string {
 
 func Pipe(cmd exec.Cmd) *PipeResult {
 	prepareProcessGroup(&cmd)
+	readyMessage := "kawaiissh-ready-" + uuid.NewString()
+	cmd.Env = append(cmd.Environ(), "KAWAII_SSH_READY="+readyMessage)
 	return &PipeResult{
-		cmd:      &cmd,
-		Messages: make([]string, 0),
-		done:     make(chan struct{}),
-		ready:    make(chan struct{}),
+		cmd:          &cmd,
+		Messages:     make([]string, 0),
+		done:         make(chan struct{}),
+		ready:        make(chan struct{}),
+		readyMessage: readyMessage,
 	}
 }
 
@@ -221,7 +227,7 @@ func Ssh(
 	cmdStr := fmt.Sprintf(
 		"%s %s@%s -L %s:%s:%s -i %s -v -o IdentitiesOnly=yes -o StrictHostKeyChecking=no "+
 			"-o ExitOnForwardFailure=yes -o ConnectTimeout=10 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 "+
-			"-o ControlMaster=no -o ControlPath=none -o ForkAfterAuthentication=no sleep %d",
+			"-o ControlMaster=no -o ControlPath=none -o ForkAfterAuthentication=no \"echo $KAWAII_SSH_READY; sleep %d\"",
 		SSHExecutable,
 		username,
 		host,

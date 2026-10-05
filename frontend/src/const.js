@@ -1,8 +1,13 @@
 const ConnectionStatus = {
     CONNECTED: 'connected',
+    RECONNECTING: 'reconnecting',
     ERROR: 'error',
     DISCONNECTED: 'disconnected',
 };
+
+const isConnectionActive = (connection) =>
+    connection?.status === ConnectionStatus.CONNECTED ||
+    connection?.status === ConnectionStatus.RECONNECTING;
 
 const PORT_NAME_LOOKUP_MAP = {
     6379: 'Redis',
@@ -13,4 +18,4 @@ const PORT_NAME_LOOKUP_MAP = {
     80: 'HTTP',
 };
 
-export { ConnectionStatus, PORT_NAME_LOOKUP_MAP };
+export { ConnectionStatus, isConnectionActive, PORT_NAME_LOOKUP_MAP };

@@ -3,25 +3,48 @@ import { getSystemHealth, terminateProcesses } from '../../operations.js';
 import './SystemHealth.css';
 import { useProfile } from '../../context/ProfileContext.jsx';
 import SectionHeader from '../../components/SectionHeader/SectionHeader.jsx';
+import Dialog from '../../components/Dialog/Dialog.jsx';
+import { ConnectionStatus } from '../../const.js';
 
 function SystemHealth() {
     const [refresh, setRefresh] = useState(0);
     const [openTunnels, setOpenTunnels] = useState([]);
-    const { reloadProfile } = useProfile();
+    const [isTerminating, setIsTerminating] = useState(false);
+    const [errorMessage, setErrorMessage] = useState(null);
+    const { setConnections } = useProfile();
 
     useEffect(() => {
-        getSystemHealth().then(setOpenTunnels);
+        getSystemHealth()
+            .then(setOpenTunnels)
+            .catch((error) => {
+                setErrorMessage(
+                    error?.message || 'Could not refresh the tunnel list.'
+                );
+            });
     }, [refresh]);
 
-    const onTerminateAll = () => {
-        if (openTunnels.length === 0) return;
-
-        terminateProcesses(openTunnels.map((tunnel) => tunnel.pid)).finally(
-            () => {
-                setRefresh(refresh + 1);
-                reloadProfile();
-            }
-        );
+    const onTerminateAll = async () => {
+        setIsTerminating(true);
+        setErrorMessage(null);
+        try {
+            await terminateProcesses(openTunnels.map((tunnel) => tunnel.pid));
+            setConnections((previous) =>
+                Object.fromEntries(
+                    Object.entries(previous).map(([id, connection]) => [
+                        id,
+                        {
+                            ...connection,
+                            status: ConnectionStatus.DISCONNECTED,
+                        },
+                    ])
+                )
+            );
+        } catch (error) {
+            setErrorMessage(error?.message || String(error));
+        } finally {
+            setRefresh((value) => value + 1);
+            setIsTerminating(false);
+        }
     };
 
     return (
@@ -30,14 +53,17 @@ function SystemHealth() {
                 <SectionHeader title={'Open Tunnels'} displayTip={false} />
                 <div className={'open-tunnels'}>
                     <div className={'control-panel'}>
-                        <button onClick={() => setRefresh(refresh + 1)}>
+                        <button
+                            disabled={isTerminating}
+                            onClick={() => setRefresh(refresh + 1)}
+                        >
                             Refresh
                         </button>
                         <button
-                            disabled={openTunnels.length === 0}
+                            disabled={isTerminating}
                             onClick={onTerminateAll}
                         >
-                            Terminate All
+                            {isTerminating ? 'Terminating…' : 'Terminate All'}
                         </button>
                     </div>
                     <div className={'open-tunnels-list'}>
@@ -61,6 +87,12 @@ function SystemHealth() {
                     </div>
                 </div>
             </div>
+            <Dialog
+                open={!!errorMessage}
+                title="Tunnel cleanup failed"
+                message={errorMessage}
+                onClose={() => setErrorMessage(null)}
+            />
         </div>
     );
 }

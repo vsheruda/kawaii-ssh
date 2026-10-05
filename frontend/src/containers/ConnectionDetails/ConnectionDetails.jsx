@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './ConnectionDetails.css';
 import TerminalStdout from '../../components/TerminalStdout/TerminalStdout.jsx';
-import { ConnectionStatus } from '../../const.js';
+import { ConnectionStatus, isConnectionActive } from '../../const.js';
 import { useLocation, useNavigate } from 'react-router';
 import { useProfile } from '../../context/ProfileContext.jsx';
 import {
@@ -11,6 +11,7 @@ import {
 } from '../../utils.js';
 import { connect, disconnect } from '../../operations.js';
 import DeleteButton from '../../components/DeleteButton/DeleteButton.jsx';
+import Dialog from '../../components/Dialog/Dialog.jsx';
 
 function ConnectionDetails() {
     const location = useLocation();
@@ -19,16 +20,14 @@ function ConnectionDetails() {
 
     const onTunnelStateChange = handleTunnelStateChange(profile, setProfile);
 
-    let tunnel = profile.tunnels.find(isSameTunnel(location.state.tunnel));
+    const tunnel =
+        profile.tunnels.find(isSameTunnel(location.state.tunnel)) ||
+        location.state.tunnel;
 
     const onConnectionStateChange = handleConnectionStateChange(
         tunnel,
         setConnections
     );
-
-    if (!tunnel) {
-        tunnel = location.state.tunnel;
-    }
 
     const [hasChanged, setHasChanged] = useState(false);
     const [host, setHost] = useState(tunnel.ssh_configuration_name);
@@ -38,6 +37,8 @@ function ConnectionDetails() {
         tunnel.remote_destination
     );
     const [isLoading, setIsLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState(null);
+    const isActive = isConnectionActive(tunnel.connection);
     const terminalContainerRef = useRef(null);
 
     useEffect(() => {
@@ -51,6 +52,7 @@ function ConnectionDetails() {
     }, [host, localPort, remotePort, remoteDestination]);
 
     const onSaveClick = () => {
+        if (isActive || isLoading) return;
         onTunnelStateChange(tunnel, {
             isNew: location.state.isNew,
             newState: {
@@ -71,15 +73,26 @@ function ConnectionDetails() {
         setHasChanged(false);
     };
 
-    const onDeleteClick = () => {
-        setProfile((prevState) => ({
-            ...prevState,
-            tunnels: prevState.tunnels.filter(
-                (it) => !isSameTunnel(tunnel)(it)
-            ),
-        }));
-
-        navigate('/connection-list');
+    const onDeleteClick = async () => {
+        if (isActive || isLoading) return;
+        setIsLoading(true);
+        try {
+            // Confirm cleanup even when the last status poll reported disconnected.
+            onConnectionStateChange(await disconnect(tunnel));
+            setProfile((prevState) => ({
+                ...prevState,
+                tunnels: prevState.tunnels.filter(
+                    (it) => !isSameTunnel(tunnel)(it)
+                ),
+            }));
+            navigate('/connection-list');
+        } catch {
+            setErrorMessage(
+                'The connection could not be stopped. Try again before deleting it.'
+            );
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const onConnectClick = () => {
@@ -95,6 +108,11 @@ function ConnectionDetails() {
 
         disconnect(tunnel)
             .then((connectionState) => onConnectionStateChange(connectionState))
+            .catch(() =>
+                setErrorMessage(
+                    'The connection could not be stopped. Please try again.'
+                )
+            )
             .finally(() => setIsLoading(false));
     };
 
@@ -103,7 +121,7 @@ function ConnectionDetails() {
             return <button className="btn">Loading...</button>;
         }
 
-        if (tunnel?.connection?.status === ConnectionStatus.CONNECTED) {
+        if (isActive) {
             return (
                 <button className="btn" onClick={onDisconnectClick}>
                     Disconnect
@@ -136,10 +154,7 @@ function ConnectionDetails() {
                         <select
                             id={'host'}
                             value={host}
-                            disabled={
-                                tunnel.connection?.status ===
-                                ConnectionStatus.CONNECTED
-                            }
+                            disabled={isActive || isLoading}
                             onChange={({ target: { value } }) => setHost(value)}
                         >
                             <option key={'-'} value="---" name="---">
@@ -156,10 +171,7 @@ function ConnectionDetails() {
                         <label htmlFor={'local-port'}>Tunnel</label>
                         <input
                             id={'local-port'}
-                            disabled={
-                                tunnel.connection?.status ===
-                                ConnectionStatus.CONNECTED
-                            }
+                            disabled={isActive || isLoading}
                             onChange={({ target: { value } }) =>
                                 setLocalPort(value)
                             }
@@ -172,10 +184,7 @@ function ConnectionDetails() {
                         />
                         <input
                             id={'remote-destination'}
-                            disabled={
-                                tunnel.connection?.status ===
-                                ConnectionStatus.CONNECTED
-                            }
+                            disabled={isActive || isLoading}
                             onChange={({ target: { value } }) =>
                                 setRemoteDestination(value)
                             }
@@ -187,10 +196,7 @@ function ConnectionDetails() {
                         />
                         <input
                             id={'remote-port'}
-                            disabled={
-                                tunnel.connection?.status ===
-                                ConnectionStatus.CONNECTED
-                            }
+                            disabled={isActive || isLoading}
                             onChange={({ target: { value } }) =>
                                 setRemotePort(value)
                             }
@@ -204,7 +210,7 @@ function ConnectionDetails() {
                     </div>
                     <div className={'control-panel'}>
                         <button
-                            disabled={!hasChanged}
+                            disabled={!hasChanged || isActive || isLoading}
                             onClick={onSaveClick}
                             className="btn"
                         >
@@ -213,16 +219,17 @@ function ConnectionDetails() {
                         <DeleteButton
                             itemType="connection"
                             itemName={`${tunnel.local_port} → ${tunnel.remote_destination}:${tunnel.remote_port}`}
-                            disabled={
-                                tunnel.connection?.status ===
-                                    ConnectionStatus.CONNECTED || isLoading
-                            }
+                            disabled={isActive || isLoading}
                             onConfirm={onDeleteClick}
                         />
                         {getActionButton()}
                         <div
                             className={`status-circle ${tunnel.connection?.status}`}
                         ></div>
+                        {tunnel.connection?.status ===
+                            ConnectionStatus.RECONNECTING && (
+                            <span role="status">Reconnecting…</span>
+                        )}
                     </div>
                 </div>
                 <TerminalStdout
@@ -232,6 +239,12 @@ function ConnectionDetails() {
                     scrollRef={terminalContainerRef}
                 />
             </div>
+            <Dialog
+                open={!!errorMessage}
+                title="Connection cleanup failed"
+                message={errorMessage}
+                onClose={() => setErrorMessage(null)}
+            />
         </div>
     );
 }

@@ -4,9 +4,12 @@ import (
 	"KawaiiSSH/lib/models"
 	"KawaiiSSH/lib/utils"
 	"context"
+	"errors"
 	"fmt"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"os"
 	"regexp"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -50,7 +53,12 @@ func ConnectionLoop(a *App) {
 
 func (a *App) Disconnect(hash string) models.ConnectResponse {
 	runtime.LogInfof(a.ctx, "Disconnecting hash=%s", hash)
+	response := a.disconnect(hash)
+	runtime.LogInfof(a.ctx, "Disconnected hash=%s response_code=%d", hash, response.ResponseCode)
+	return response
+}
 
+func (a *App) disconnect(hash string) models.ConnectResponse {
 	a.sshPipesMutex.Lock()
 	defer a.sshPipesMutex.Unlock()
 
@@ -65,22 +73,21 @@ func (a *App) Disconnect(hash string) models.ConnectResponse {
 
 	sshPipe := a.sshPipes[hash]
 
-	if sshPipe.PipeResult.Stop() {
-		delete(a.sshPipes, hash)
+	if !sshPipe.PipeResult.Stop() {
+		return models.ConnectResponse{
+			ID:              hash,
+			Messages:        sshPipe.PipeResult.GetMessages(),
+			ResponseMessage: sshPipe.PipeResult.ResponseMessage(),
+			ResponseCode:    500,
+		}
 	}
-
-	runtime.LogInfof(
-		a.ctx,
-		"Disconnected hash=%s response_code=%d",
-		sshPipe.PipeResult.Hash(),
-		sshPipe.PipeResult.ResponseCode(),
-	)
+	delete(a.sshPipes, hash)
 
 	return models.ConnectResponse{
 		ID:              sshPipe.PipeResult.Hash(),
 		Messages:        sshPipe.PipeResult.GetMessages(),
-		ResponseMessage: sshPipe.PipeResult.ResponseMessage(),
-		ResponseCode:    sshPipe.PipeResult.ResponseCode(),
+		ResponseMessage: "Disconnected",
+		ResponseCode:    200,
 	}
 }
 
@@ -125,6 +132,7 @@ func (a *App) connect(sshPipe *utils.SSHPipeResult) models.ConnectResponse {
 
 	return models.ConnectResponse{
 		ID:              hash,
+		IsConnected:     sshPipe.IsConnected(),
 		Messages:        sshPipe.PipeResult.GetMessages(),
 		ResponseMessage: sshPipe.PipeResult.ResponseMessage(),
 		ResponseCode:    sshPipe.PipeResult.ResponseCode(),
@@ -202,25 +210,46 @@ func (a *App) GetSystemHealth() models.SystemHealthResponse {
 	}
 }
 
-func (a *App) TerminateProcesses(pids []string) {
+func (a *App) TerminateProcesses(pids []string) error {
+	runtime.LogInfof(a.ctx, "Terminating all tunnels")
+	err := a.terminateProcesses(pids)
+	if err != nil {
+		runtime.LogErrorf(a.ctx, "Tunnel termination failed: %s", err)
+	}
+	return err
+}
+
+func (a *App) terminateProcesses(pids []string) error {
 	a.sshPipesMutex.Lock()
 	defer a.sshPipesMutex.Unlock()
 
-	for _, pid := range pids {
-		_, err := utils.CmdExecute(a.ctx, "kill -9 "+pid)
-
-		if err != nil {
-			runtime.LogErrorf(a.ctx, "Failed to kill process pid=%s error=%s", pid, err)
+	// Cancel every retry before stopping any process, including attempts without a PID.
+	pipes := a.sshPipes
+	a.sshPipes = make(map[string]*utils.SSHPipeResult)
+	var failures []error
+	for hash, pipe := range pipes {
+		if !pipe.PipeResult.Stop() {
+			failures = append(failures, fmt.Errorf("could not stop tunnel %s: %s", hash, pipe.PipeResult.ResponseMessage()))
 		}
 	}
 
-	// This won't work once termination by PID is implemented.
-	// Need to find a better way to know which hash to remove.
-	for k, sshPipe := range a.sshPipes {
-		if sshPipe.PipeResult.Stop() {
-			delete(a.sshPipes, k)
+	// The system list can also contain tunnels left by earlier app sessions.
+	for _, value := range pids {
+		pid, err := strconv.Atoi(value)
+		if err != nil || pid <= 0 {
+			failures = append(failures, fmt.Errorf("invalid process ID %q", value))
+			continue
+		}
+		process, err := os.FindProcess(pid)
+		if err == nil {
+			err = process.Kill()
+			process.Release()
+		}
+		if err != nil && !errors.Is(err, os.ErrProcessDone) {
+			failures = append(failures, fmt.Errorf("could not stop process %d: %w", pid, err))
 		}
 	}
+	return errors.Join(failures...)
 }
 
 func (a *App) SaveProfile(profile models.Profile) {

@@ -8,6 +8,7 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"os"
 	"os/exec"
@@ -129,8 +130,17 @@ func TestOpenSSHTunnelReadiness(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, occupied := range []bool{false, true} {
-		t.Run(fmt.Sprintf("port_occupied=%v", occupied), func(t *testing.T) {
+	for _, test := range []struct {
+		name                        string
+		occupied, jump, unavailable bool
+	}{
+		{name: "direct"},
+		{name: "occupied port", occupied: true},
+		{name: "jump host", jump: true},
+		{name: "jump host with occupied port", jump: true, occupied: true},
+		{name: "jump host with unavailable target", jump: true, unavailable: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
 			server, err := net.Listen("tcp4", "127.0.0.1:0")
 			if err != nil {
 				t.Fatal(err)
@@ -161,34 +171,100 @@ func TestOpenSSHTunnelReadiness(t *testing.T) {
 						defer channel.Close()
 						for request := range requests {
 							request.Reply(request.Type == "exec", nil)
+							if request.Type == "exec" {
+								var payload struct{ Command string }
+								if ssh.Unmarshal(request.Payload, &payload) == nil {
+									// Emulate only the target's acknowledgement, without executing commands.
+									echo := strings.SplitN(payload.Command, ";", 2)[0]
+									if strings.HasPrefix(echo, "echo kawaiissh-ready-") {
+										fmt.Fprintln(channel, strings.TrimPrefix(echo, "echo "))
+									}
+								}
+							}
 						}
 					}()
 				}
 			}()
+			var proxyArguments []string
+			if test.jump {
+				jump, err := net.Listen("tcp4", "127.0.0.1:0")
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer jump.Close()
+				go func() {
+					raw, err := jump.Accept()
+					if err != nil {
+						return
+					}
+					defer raw.Close()
+					config := &ssh.ServerConfig{NoClientAuth: true}
+					config.AddHostKey(signer)
+					conn, channels, requests, err := ssh.NewServerConn(raw, config)
+					if err != nil {
+						return
+					}
+					defer conn.Close()
+					go ssh.DiscardRequests(requests)
+					for incoming := range channels {
+						channel, requests, err := incoming.Accept()
+						if err != nil {
+							continue
+						}
+						go ssh.DiscardRequests(requests)
+						go func() {
+							defer channel.Close()
+							if test.unavailable {
+								io.Copy(io.Discard, channel)
+								return
+							}
+							target, err := net.DialTimeout("tcp", server.Addr().String(), time.Second)
+							if err != nil {
+								return
+							}
+							defer target.Close()
+							go func() { io.Copy(target, channel); target.Close() }()
+							io.Copy(channel, target)
+						}()
+					}
+				}()
+				proxy := fmt.Sprintf("%s -F /dev/null -v -T -o BatchMode=yes -o StrictHostKeyChecking=no "+
+					"-o UserKnownHostsFile=/dev/null -o GlobalKnownHostsFile=/dev/null -W unused.invalid:22 -p %d tester@127.0.0.1",
+					executable, jump.Addr().(*net.TCPAddr).Port)
+				proxyArguments = []string{"-o", "ProxyCommand=" + proxy}
+			}
 			reservation, err := net.Listen("tcp4", "127.0.0.1:0")
 			if err != nil {
 				t.Fatal(err)
 			}
 			defer reservation.Close()
 			localAddress := reservation.Addr().String()
-			if !occupied {
+			if !test.occupied {
 				reservation.Close()
 			}
-			cmd := exec.Command(executable, "-F", "/dev/null", "-v", "-T",
+			args := []string{"-c", `exec "$@" "echo $KAWAII_SSH_READY; sleep 30"`, "test-ssh",
+				executable, "-F", "/dev/null", "-v", "-T",
 				"-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no",
 				"-o", "UserKnownHostsFile=/dev/null", "-o", "GlobalKnownHostsFile=/dev/null",
-				"-o", "ExitOnForwardFailure=yes", "-L", localAddress+":127.0.0.1:22",
-				"-p", strconv.Itoa(server.Addr().(*net.TCPAddr).Port), "tester@127.0.0.1", "sleep 30")
+				"-o", "ExitOnForwardFailure=yes", "-L", localAddress + ":127.0.0.1:22"}
+			args = append(args, proxyArguments...)
+			args = append(args, "-p", strconv.Itoa(server.Addr().(*net.TCPAddr).Port), "tester@127.0.0.1")
+			cmd := exec.Command("/bin/sh", args...)
 			tunnel := &SSHPipeResult{PipeResult: Pipe(*cmd)}
 			t.Cleanup(func() { tunnel.PipeResult.Stop() })
 			tunnel.PipeResult.Run()
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 			defer cancel()
 			err = tunnel.WaitForConnection(ctx)
-			if (err == nil) == occupied || tunnel.IsConnected() == occupied {
-				t.Fatalf("incorrect readiness: occupied=%v, err=%v, output=%v", occupied, err, tunnel.PipeResult.GetMessages())
+			wantReady := !test.occupied && !test.unavailable
+			if (err == nil) != wantReady || tunnel.IsConnected() != wantReady {
+				t.Fatalf("incorrect readiness: wantReady=%v, err=%v, output=%v", wantReady, err, tunnel.PipeResult.GetMessages())
+			}
+			if test.unavailable && !strings.Contains(strings.Join(tunnel.PipeResult.GetMessages(), "\n"), "Entering interactive session.") {
+				t.Fatal("the jump process did not emit the misleading readiness message")
 			}
 			tunnel.PipeResult.Stop()
+			server.Close()
 			select {
 			case <-serverDone:
 			case <-time.After(3 * time.Second):

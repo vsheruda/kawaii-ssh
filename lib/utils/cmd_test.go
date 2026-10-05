@@ -89,6 +89,10 @@ func TestTunnelReadinessResetsOnReconnect(t *testing.T) {
 		t.Fatal("a listener attempt was reported as a ready tunnel")
 	}
 	pipe.AppendMessage("debug1: Entering interactive session.")
+	if tunnel.IsConnected() {
+		t.Fatal("proxy diagnostics were accepted as target readiness")
+	}
+	pipe.AppendMessage(pipe.readyMessage)
 	if err := tunnel.WaitForConnection(context.Background()); err != nil {
 		t.Fatal(err)
 	}
@@ -99,10 +103,14 @@ func TestTunnelReadinessResetsOnReconnect(t *testing.T) {
 		t.Fatal("trimming old messages lost readiness")
 	}
 	tunnel.reconnect()
+	if tunnel.PipeResult.Hash() != pipe.Hash() {
+		t.Fatal("the readiness token changed the connection identity")
+	}
+	tunnel.PipeResult.AppendMessage(pipe.readyMessage)
 	if tunnel.IsConnected() {
 		t.Fatal("the replacement inherited the previous tunnel's readiness")
 	}
-	tunnel.PipeResult.AppendMessage("debug1: Entering interactive session.")
+	tunnel.PipeResult.AppendMessage(tunnel.PipeResult.readyMessage)
 	tunnel.PipeResult.cmd.Process.Kill()
 	waitForPipe(t, tunnel.PipeResult)
 	if tunnel.IsConnected() {

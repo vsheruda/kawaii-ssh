@@ -11,6 +11,7 @@ type ConnectPayload struct {
 
 type ConnectResponse struct {
 	ID              string   `json:"id"`
+	IsConnected     bool     `json:"is_connected"`
 	Messages        []string `json:"messages"`
 	ResponseMessage string   `json:"responseMessage"`
 	ResponseCode    int16    `json:"responseCode"`

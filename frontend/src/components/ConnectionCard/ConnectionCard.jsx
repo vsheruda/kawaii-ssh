@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import './ConnectionCard.css';
 import 'react-toggle/style.css';
-import { ConnectionStatus, PORT_NAME_LOOKUP_MAP } from '../../const.js';
+import {
+    ConnectionStatus,
+    isConnectionActive,
+    PORT_NAME_LOOKUP_MAP,
+} from '../../const.js';
 import Toggle from 'react-toggle';
 import { IoDesktopSharp, IoSettingsSharp } from 'react-icons/io5';
 import { useNavigate } from 'react-router';
@@ -12,7 +16,7 @@ function ConnectionCard({ tunnel, onChange }) {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
 
-    const isEnabled = tunnel.connection?.status === ConnectionStatus.CONNECTED;
+    const isEnabled = isConnectionActive(tunnel.connection);
 
     const onEditClick = () => {
         navigate('/connection-details', { state: { tunnel } });
@@ -42,6 +46,10 @@ function ConnectionCard({ tunnel, onChange }) {
             <div className={'connection-card'}>
                 <div className={'port-container'}>
                     <span className={'port'}>{getCardName(tunnel)}</span>
+                    {tunnel.connection?.status ===
+                        ConnectionStatus.RECONNECTING && (
+                        <span role="status">Reconnecting…</span>
+                    )}
                     <Toggle
                         checked={isEnabled || isLoading}
                         disabled={isLoading}

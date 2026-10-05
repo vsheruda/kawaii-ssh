@@ -11,7 +11,7 @@ import AddCardPlaceholder from '../../components/AddCardPlaceholder/AddCardPlace
 import { useNavigate } from 'react-router';
 import { v4 as uuid } from 'uuid';
 import _ from 'lodash';
-import { ConnectionStatus } from '../../const.js';
+import { isConnectionActive } from '../../const.js';
 import { HiOutlineCollection } from 'react-icons/hi';
 import { FaObjectUngroup, FaRegObjectGroup } from 'react-icons/fa';
 import { PiPlugsConnectedFill } from 'react-icons/pi';
@@ -105,7 +105,7 @@ function ConnectionControl({
                     <div className={'section'}>
                         <span
                             className={showConnectedOnly ? 'active' : ''}
-                            title={'Show connected only'}
+                            title={'Show active only'}
                             onClick={() => {
                                 setShowConnectedOnly(!showConnectedOnly);
                             }}
@@ -135,9 +135,7 @@ function ConnectionList() {
         let tunnels = profile.tunnels || [];
 
         if (showConnectedOnly) {
-            tunnels = tunnels.filter(
-                (it) => it.connection?.status === ConnectionStatus.CONNECTED
-            );
+            tunnels = tunnels.filter((it) => isConnectionActive(it.connection));
         }
 
         if (isGroupedView) {
